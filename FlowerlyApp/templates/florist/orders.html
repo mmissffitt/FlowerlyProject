@@ -89,7 +89,7 @@
                                     <td>{{ order.user.first_name }} {{ order.user.last_name }}</td>
                                     <td>{{ order.user.phone }}</td>
                                     <td>{{ order.delivery_date|date:"d.m.Y" }}</td>
-                                    <td>{{ order.delivery_time_from }} – {{ order.delivery_time_to }}</td>
+                                    <td>{{ order.get_delivery_time_slot_display }}</td>
                                     <td class="fw-bold">{{ order.total_price }} ₽</td>
                                     <td>
                                         <span class="badge 

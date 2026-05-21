@@ -121,7 +121,7 @@
                         <div class="card-body">
                             <p class="mb-1"><strong>Адрес:</strong> {{ order.address }}</p>
                             <p class="mb-1"><strong>Дата:</strong> {{ order.delivery_date|date:"d.m.Y" }}</p>
-                            <p class="mb-0"><strong>Время:</strong> {{ order.delivery_time_from }} – {{ order.delivery_time_to }}</p>
+                            <p class="mb-0"><strong>Время:</strong> {{ order.get_delivery_time_slot_display }}</p>
                         </div>
                     </div>
                     

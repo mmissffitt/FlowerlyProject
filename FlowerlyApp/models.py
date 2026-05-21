@@ -340,8 +340,12 @@ class Order(models.Model):
     status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='new')
     address = models.TextField('Адрес доставки')
     delivery_date = models.DateField('Дата доставки')
-    delivery_time_from = models.TimeField('Время доставки с')
-    delivery_time_to = models.TimeField('Время доставки до')
+    delivery_time_slot = models.CharField('Слот доставки', max_length=20, choices=[
+    ('9-12', '09:00 – 12:00'),
+    ('12-15', '12:00 – 15:00'),
+    ('15-18', '15:00 – 18:00'),
+    ('18-21', '18:00 – 21:00'),
+    ], default='9-12')
     comment = models.TextField('Комментарий', blank=True)
     promo_code = models.ForeignKey(PromoCode, on_delete=models.SET_NULL, null=True, blank=True)
     discount_amount = models.DecimalField('Скидка', max_digits=10, decimal_places=2, default=0)

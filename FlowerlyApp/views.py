@@ -547,15 +547,14 @@ def checkout(request):
             # Создаём заказ
             total = cart.total_price()
             order = Order.objects.create(
-                user=request.user,
-                address=form.cleaned_data['address'],
-                delivery_date=delivery_date,
-                delivery_time_from=form.cleaned_data['delivery_time_from'],
-                delivery_time_to=form.cleaned_data['delivery_time_to'],
-                comment=form.cleaned_data['comment'],
-                promo_code=promo,
-                discount_amount=discount_amount,
-                total_price=total - discount_amount,
+            user=request.user,
+            address=form.cleaned_data['address'],
+            delivery_date=delivery_date,
+            delivery_time_slot=form.cleaned_data['delivery_time_slot'],
+            comment=form.cleaned_data['comment'],
+            promo_code=promo,
+            discount_amount=discount_amount,
+            total_price=total - discount_amount,
             )
 
             # Переносим товары из корзины в заказ
@@ -813,11 +812,11 @@ def florist_dashboard(request):
 
     today_orders = Order.objects.filter(
         delivery_date=today
-    ).exclude(status__in=['cancelled', 'delivered']).order_by('delivery_time_from')
+    ).exclude(status__in=['cancelled', 'delivered']).order_by('delivery_time_slot')
 
     tomorrow_orders = Order.objects.filter(
         delivery_date=tomorrow
-    ).exclude(status__in=['cancelled', 'delivered']).order_by('delivery_time_from')
+    ).exclude(status__in=['cancelled', 'delivered']).order_by('delivery_time_slot')
 
     active_orders_count = Order.objects.filter(
         status__in=['new', 'confirmed', 'assembling', 'ready', 'in_delivery']
@@ -829,7 +828,6 @@ def florist_dashboard(request):
         'active_orders_count': active_orders_count,
     }
     return render(request, 'florist/dashboard.html', context)
-
 
 @florist_required
 def florist_orders(request):

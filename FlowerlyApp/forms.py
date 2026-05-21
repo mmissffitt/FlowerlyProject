@@ -61,20 +61,17 @@ class CheckoutForm(forms.Form):
             'type': 'date',
         })
     )
-    delivery_time_from = forms.TimeField(
-        label='Время доставки с',
-        widget=forms.TimeInput(attrs={
+    delivery_time_slot = forms.ChoiceField(
+        label='Время доставки',
+        choices=[
+            ('', 'Выберите время...'),
+            ('9-12', '09:00 – 12:00'),
+            ('12-15', '12:00 – 15:00'),
+            ('15-18', '15:00 – 18:00'),
+            ('18-21', '18:00 – 21:00'),
+        ],
+        widget=forms.Select(attrs={
             'class': 'form-control',
-            'type': 'time',
-            'value': '09:00'
-        })
-    )
-    delivery_time_to = forms.TimeField(
-        label='Время доставки до',
-        widget=forms.TimeInput(attrs={
-            'class': 'form-control',
-            'type': 'time',
-            'value': '18:00'
         })
     )
     comment = forms.CharField(

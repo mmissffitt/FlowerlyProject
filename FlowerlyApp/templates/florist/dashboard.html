@@ -80,7 +80,7 @@
                                 <tr>
                                     <th>Номер</th>
                                     <th>Клиент</th>
-                                    <th>Время</th>
+                                    <th>Слот</th>
                                     <th>Адрес</th>
                                     <th>Сумма</th>
                                     <th>Статус</th>
@@ -92,7 +92,7 @@
                                 <tr>
                                     <td><strong>№{{ order.id }}</strong></td>
                                     <td>{{ order.user.first_name }}</td>
-                                    <td>{{ order.delivery_time_from }} – {{ order.delivery_time_to }}</td>
+                                    <td>{{ order.get_delivery_time_slot_display }}</td>
                                     <td><small>{{ order.address|truncatechars:30 }}</small></td>
                                     <td class="fw-bold">{{ order.total_price }} ₽</td>
                                     <td>
@@ -135,7 +135,7 @@
                                 <tr>
                                     <th>Номер</th>
                                     <th>Клиент</th>
-                                    <th>Время</th>
+                                    <th>Слот</th>
                                     <th>Адрес</th>
                                     <th>Сумма</th>
                                     <th>Статус</th>
@@ -147,7 +147,7 @@
                                 <tr>
                                     <td><strong>№{{ order.id }}</strong></td>
                                     <td>{{ order.user.first_name }}</td>
-                                    <td>{{ order.delivery_time_from }} – {{ order.delivery_time_to }}</td>
+                                    <td>{{ order.get_delivery_time_slot_display }}</td>
                                     <td><small>{{ order.address|truncatechars:30 }}</small></td>
                                     <td class="fw-bold">{{ order.total_price }} ₽</td>
                                     <td>

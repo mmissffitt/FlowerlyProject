@@ -27,31 +27,30 @@
                 </div>
                 
                 <!-- Дата и время -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Дата и время доставки</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Дата доставки</label>
-                                {{ form.delivery_date }}
-                                {% if form.delivery_date.errors %}
-                                <div class="text-danger small">{{ form.delivery_date.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">Доставка возможна начиная с завтрашнего дня</div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Время с</label>
-                                {{ form.delivery_time_from }}
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Время до</label>
-                                {{ form.delivery_time_to }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Дата и время доставки</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Дата доставки</label>
+                {{ form.delivery_date }}
+                {% if form.delivery_date.errors %}
+                <div class="text-danger small">{{ form.delivery_date.errors }}</div>
+                {% endif %}
+                <div class="form-text">Доставка возможна начиная с завтрашнего дня</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Время доставки</label>
+                {{ form.delivery_time_slot }}
+                {% if form.delivery_time_slot.errors %}
+                <div class="text-danger small">{{ form.delivery_time_slot.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
                 
                 <!-- Комментарий -->
                 <div class="card shadow-sm mb-4">
