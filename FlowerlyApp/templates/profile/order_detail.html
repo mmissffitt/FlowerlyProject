@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказ №{{ order.id }} — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'flowerly:profile' %}">Личный кабинет</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'flowerly:order_history' %}">Мои заказы</a></li>
+            <li class="breadcrumb-item active">Заказ №{{ order.id }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Статус заказа -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Заказ №{{ order.id }}</h5>
+                    <span class="badge fs-6
+                        {% if order.status == 'new' %}bg-primary
+                        {% elif order.status == 'confirmed' %}bg-info text-dark
+                        {% elif order.status == 'assembling' %}bg-warning text-dark
+                        {% elif order.status == 'ready' %}bg-secondary
+                        {% elif order.status == 'in_delivery' %}bg-info
+                        {% elif order.status == 'delivered' %}bg-success
+                        {% elif order.status == 'cancelled' %}bg-danger
+                        {% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Состав заказа -->
+                    <h6 class="fw-bold mb-3">Состав заказа:</h6>
+                    {% for item in items %}
+                    <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom">
+                        <div>
+                            <strong>{{ item.get_name }}</strong>
+                            {% if item.quantity > 1 %}
+                            <span class="badge bg-light text-dark">×{{ item.quantity }}</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <span class="fw-bold">{{ item.price }} ₽</span>
+                            {% if order.status == 'delivered' and item.ready_bouquet %}
+                            <br>
+                            <a href="{% url 'flowerly:add_review' item.ready_bouquet.id %}" class="btn btn-sm btn-outline-warning mt-1">
+                                <i class="bi bi-star"></i> Оставить отзыв
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if order.discount_amount > 0 %}
+                    <div class="d-flex justify-content-between text-success mt-2">
+                        <span>Скидка</span>
+                        <span>−{{ order.discount_amount }} ₽</span>
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Итого</span>
+                        <span class="text-danger">{{ order.total_price }} ₽</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- История статусов -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">История статусов</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for history in status_history %}
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span>
+                                {% if history.status == 'new' %}<i class="bi bi-plus-circle text-primary"></i>
+                                {% elif history.status == 'confirmed' %}<i class="bi bi-check-circle text-info"></i>
+                                {% elif history.status == 'assembling' %}<i class="bi bi-gear text-warning"></i>
+                                {% elif history.status == 'ready' %}<i class="bi bi-box-seam text-secondary"></i>
+                                {% elif history.status == 'in_delivery' %}<i class="bi bi-truck text-info"></i>
+                                {% elif history.status == 'delivered' %}<i class="bi bi-check-circle-fill text-success"></i>
+                                {% elif history.status == 'cancelled' %}<i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                                {{ history.get_status_display }}
+                            </span>
+                            <small class="text-muted">{{ history.changed_at|date:"d.m.Y H:i" }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Кнопка отмены -->
+            {% if order.can_be_cancelled %}
+            <form method="post" action="{% url 'flowerly:cancel_order' order.id %}" class="mb-4">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger" 
+                        onclick="return confirm('Вы уверены, что хотите отменить заказ №{{ order.id }}?')">
+                    <i class="bi bi-x-circle"></i> Отменить заказ
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        
+        <!-- Информация о доставке -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-truck"></i> Доставка</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Адрес:</strong></p>
+                    <p class="text-muted">{{ order.address }}</p>
+                    <p class="mb-1"><strong>Дата:</strong> {{ order.delivery_date|date:"d.m.Y" }}</p>
+                    <p class="mb-0"><strong>Время:</strong> {{ order.delivery_time_from }} – {{ order.delivery_time_to }}</p>
+                </div>
+            </div>
+            
+            {% if order.comment %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-chat-dots"></i> Комментарий</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">{{ order.comment }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

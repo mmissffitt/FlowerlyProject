@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Конструктор букетов — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Левая панель — выбор компонентов -->
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-3"><i class="bi bi-puzzle"></i> Соберите свой букет</h2>
+            
+            <ul class="nav nav-tabs mb-3" id="constructorTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#tab-flowers">
+                        <i class="bi bi-flower1"></i> Цветы
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#tab-decors">
+                        <i class="bi bi-gift"></i> Декор
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="tab-content">
+                <!-- Вкладка Цветы -->
+                <div class="tab-pane fade show active" id="tab-flowers">
+                    <div class="row g-3">
+                        {% for flower in flowers %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card h-100 shadow-sm border-0">
+                                {% if flower.image %}
+                                <img src="{{ flower.image.url }}" class="card-img-top" alt="{{ flower.name }}" 
+                                     style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                    <i class="bi bi-flower1 text-muted display-4"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">{{ flower.name }}</h6>
+                                    <p class="text-danger fw-bold mb-2">{{ flower.price }} ₽/шт</p>
+                                    <button class="btn btn-outline-danger btn-sm w-100" 
+                                            onclick="openFlowerModal('{{ flower.id }}', '{{ flower.name|escapejs }}', {{ flower.price }}, '{% if flower.image %}{{ flower.image.url }}{% else %}{% static 'images/no-photo.png' %}{% endif %}')">
+                                        <i class="bi bi-plus-circle"></i> Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Вкладка Декор -->
+                <div class="tab-pane fade" id="tab-decors">
+                    <div class="row g-3">
+                        {% for decor in decors %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card h-100 shadow-sm border-0">
+                                {% if decor.image %}
+                                <img src="{{ decor.image.url }}" class="card-img-top" alt="{{ decor.name }}" 
+                                     style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                    <i class="bi bi-gift text-muted display-4"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">{{ decor.name }}</h6>
+                                    <p class="text-danger fw-bold mb-2">{{ decor.price }} ₽/шт</p>
+                                    <button class="btn btn-outline-danger btn-sm w-100" 
+                                            onclick="openDecorModal('{{ decor.id }}', '{{ decor.name|escapejs }}', {{ decor.price }}, '{% if decor.image %}{{ decor.image.url }}{% else %}{% static 'images/no-photo.png' %}{% endif %}')">
+                                        <i class="bi bi-plus-circle"></i> Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Правая панель — Ваш букет -->
+        <div class="col-md-4">
+            <div class="card shadow-sm sticky-top" style="top: 80px;">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-flower2"></i> Ваш букет</h5>
+                </div>
+                <div class="card-body" id="bouquet-preview">
+                    {% if session_bouquet.flowers or session_bouquet.decors %}
+                        <!-- Цветы -->
+                        {% if session_bouquet.flowers %}
+                        <h6 class="fw-bold">Цветы:</h6>
+                        <ul class="list-group list-group-flush mb-3" id="flower-list">
+                            {% for fid, item in session_bouquet.flowers.items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0" data-id="{{ fid }}">
+                                <div>
+                                    <span>{{ item.name }}</span>
+                                    <span class="badge bg-light text-dark ms-1">×{{ item.quantity }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted me-2">{{ item.price }} ₽</span>
+                                    <button class="btn btn-sm text-danger" onclick="removeFlower('{{ fid }}')">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        
+                        <!-- Декор -->
+                        {% if session_bouquet.decors %}
+                        <h6 class="fw-bold">Декор:</h6>
+                        <ul class="list-group list-group-flush mb-3" id="decor-list">
+                            {% for did, item in session_bouquet.decors.items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0" data-id="{{ did }}">
+                                <div>
+                                    <span>{{ item.name }}</span>
+                                    <span class="badge bg-light text-dark ms-1">×{{ item.quantity }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted me-2">{{ item.price }} ₽</span>
+                                    <button class="btn btn-sm text-danger" onclick="removeDecor('{{ did }}')">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-flower1 display-4"></i>
+                            <p class="mt-2">Добавьте цветы и декор, чтобы собрать букет</p>
+                        </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <!-- Итого -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-bold fs-5">Итого:</span>
+                        <span class="fw-bold fs-4 text-danger" id="total-price">{{ total }} ₽</span>
+                    </div>
+                    
+                    <!-- Кнопка добавления в корзину -->
+                    <form method="post" action="{% url 'flowerly:constructor_add_to_cart' %}">
+                        {% csrf_token %}
+                        <textarea name="notes" class="form-control mb-3" rows="2" 
+                                  placeholder="Пожелания флористу (необязательно)">{{ session_bouquet.notes }}</textarea>
+                        <button type="submit" class="btn btn-danger w-100 btn-lg" 
+                                {% if not session_bouquet.flowers and not session_bouquet.decors %}disabled{% endif %}>
+                            <i class="bi bi-cart-plus"></i> Добавить в корзину
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно выбора количества ЦВЕТКА -->
+<div class="modal fade" id="flowerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="flowerModalTitle">Добавить цветок</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="flowerModalImage" src="" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover;">
+                <p class="fw-bold" id="flowerModalName"></p>
+                <p class="text-danger" id="flowerModalPrice"></p>
+                <div class="d-flex justify-content-center align-items-center gap-3 mb-3">
+                    <button class="btn btn-outline-secondary" onclick="changeQuantity(-1)">−</button>
+                    <span class="fs-4" id="quantityDisplay">1</span>
+                    <button class="btn btn-outline-secondary" onclick="changeQuantity(1)">+</button>
+                </div>
+                <input type="hidden" id="currentFlowerId">
+                <input type="hidden" id="currentQuantity" value="1">
+                <button class="btn btn-danger w-100" onclick="addFlowerToBouquet()">
+                    Добавить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно выбора количества ДЕКОРА -->
+<div class="modal fade" id="decorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="decorModalTitle">Добавить декор</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="decorModalImage" src="" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover;">
+                <p class="fw-bold" id="decorModalName"></p>
+                <p class="text-danger" id="decorModalPrice"></p>
+                <div class="d-flex justify-content-center align-items-center gap-3 mb-3">
+                    <button class="btn btn-outline-secondary" onclick="changeDecorQuantity(-1)">−</button>
+                    <span class="fs-4" id="decorQuantityDisplay">1</span>
+                    <button class="btn btn-outline-secondary" onclick="changeDecorQuantity(1)">+</button>
+                </div>
+                <input type="hidden" id="currentDecorId">
+                <input type="hidden" id="currentDecorQuantity" value="1">
+                <button class="btn btn-danger w-100" onclick="addDecorToBouquet()">
+                    Добавить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/constructor.js' %}"></script>
+{% endblock %}

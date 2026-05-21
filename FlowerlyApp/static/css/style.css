@@ -1,0 +1,480 @@
+/* ============================================
+   FLOWERLY — ОСНОВНЫЕ СТИЛИ
+   ============================================ */
+
+/* --- Общие стили --- */
+:root {
+  --flowerly-primary: #dc3545;
+  --flowerly-primary-dark: #bb2d3b;
+  --flowerly-primary-light: #f8d7da;
+  --flowerly-secondary: #6c757d;
+  --flowerly-success: #198754;
+  --flowerly-warning: #ffc107;
+  --flowerly-bg-light: #f8f9fa;
+  --flowerly-text-muted: #6c757d;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #212529;
+  background-color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* --- Навбар --- */
+.navbar {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.navbar-brand i {
+  font-size: 1.6rem;
+  vertical-align: -3px;
+}
+
+.nav-link {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background-color: var(--flowerly-primary-light);
+  color: var(--flowerly-primary) !important;
+}
+
+.nav-link.active {
+  background-color: var(--flowerly-primary-light);
+  color: var(--flowerly-primary) !important;
+  font-weight: 600;
+}
+
+/* --- Кнопки --- */
+.btn-danger {
+  background-color: var(--flowerly-primary);
+  border-color: var(--flowerly-primary);
+}
+
+.btn-danger:hover {
+  background-color: var(--flowerly-primary-dark);
+  border-color: var(--flowerly-primary-dark);
+}
+
+.btn-outline-danger {
+  color: var(--flowerly-primary);
+  border-color: var(--flowerly-primary);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--flowerly-primary);
+  border-color: var(--flowerly-primary);
+  color: #fff;
+}
+
+.btn-lg {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 12px;
+}
+
+/* --- Карточки --- */
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+}
+
+.card-img-top {
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.03);
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+/* --- Формы --- */
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 0.6rem 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--flowerly-primary);
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-select {
+  border-radius: 8px;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+/* --- Таблицы --- */
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  padding: 0.75rem 1rem;
+}
+
+.table tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+/* --- Бейджи --- */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 6px;
+}
+
+/* --- Hero-секция на главной --- */
+.hero-section {
+  border-radius: 20px;
+  margin: 1rem auto;
+  max-width: 1100px;
+}
+
+.hero-section h1 {
+  color: #2d2d2d;
+}
+
+.hero-section .lead {
+  color: #555;
+}
+
+/* --- Прогресс-бар статусов заказа --- */
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 10px;
+}
+
+.progress-steps::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  right: 5%;
+  height: 3px;
+  background: #dee2e6;
+  z-index: 0;
+  border-radius: 2px;
+}
+
+.step {
+  position: relative;
+  z-index: 1;
+  background: #e9ecef;
+  color: #6c757d;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 70px;
+}
+
+.step.active {
+  background: var(--flowerly-primary);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.step.cancelled {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+
+/* --- Звёздный рейтинг --- */
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  gap: 8px;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 2.2rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.star-rating label:hover {
+  transform: scale(1.2);
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #ffc107;
+}
+
+/* --- Панель флориста — боковое меню --- */
+.bg-light .nav-link {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.bg-light .nav-link:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--flowerly-primary) !important;
+}
+
+.bg-light .nav-link.active {
+  font-weight: 600;
+}
+
+/* --- Админ-панель — боковое меню --- */
+.bg-dark .nav-link {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.bg-dark .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff !important;
+}
+
+.bg-dark .nav-link.active {
+  font-weight: 600;
+}
+
+/* --- Анимации --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+.card:nth-child(2) { animation-delay: 0.05s; }
+.card:nth-child(3) { animation-delay: 0.1s; }
+.card:nth-child(4) { animation-delay: 0.15s; }
+.card:nth-child(5) { animation-delay: 0.2s; }
+.card:nth-child(6) { animation-delay: 0.25s; }
+
+/* --- Алерты --- */
+.alert {
+  border-radius: 10px;
+  border: none;
+}
+
+/* --- Футер --- */
+footer {
+  margin-top: auto;
+}
+
+footer a {
+  transition: color 0.2s ease;
+}
+
+footer a:hover {
+  color: #fff !important;
+}
+
+/* --- Корзина --- */
+.cart-badge {
+  font-size: 0.65rem;
+  padding: 0.25em 0.5em;
+}
+
+/* --- Scroll to top (опционально) --- */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: var(--flowerly-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: none;
+  z-index: 999;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+  transition: all 0.3s ease;
+}
+
+.scroll-top-btn:hover {
+  background: var(--flowerly-primary-dark);
+  transform: translateY(-3px);
+}
+
+.scroll-top-btn.show {
+  display: block;
+}
+
+/* --- Модальные окна --- */
+.modal-content {
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+}
+
+.modal-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* --- Хлебные крошки --- */
+.breadcrumb {
+  background: transparent;
+  padding: 0;
+}
+
+.breadcrumb-item a {
+  color: var(--flowerly-primary);
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  text-decoration: underline;
+}
+
+/* --- Отзывы --- */
+.review-card {
+  transition: all 0.2s ease;
+}
+
+.review-card:hover {
+  background-color: #fafafa;
+}
+
+/* --- Страница конструктора --- */
+.constructor-flower-card {
+  cursor: pointer;
+}
+
+.constructor-flower-card .card-body {
+  padding: 0.75rem;
+}
+
+/* --- Мелкие утилиты --- */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.sticky-top {
+  z-index: 1020;
+}
+
+.shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- Адаптив --- */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 1rem;
+    margin: 0.5rem;
+    border-radius: 12px;
+  }
+  
+  .hero-section h1 {
+    font-size: 1.8rem;
+  }
+  
+  .hero-section .lead {
+    font-size: 1rem;
+  }
+  
+  .card-img-top {
+    height: 150px !important;
+  }
+  
+  .step {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+    min-width: 50px;
+  }
+  
+  .table {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .btn-lg {
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+  
+  .star-rating label {
+    font-size: 1.6rem;
+  }
+}
+
+/* Заглушка для отсутствующих изображений */
+.img-placeholder {
+    background: linear-gradient(135deg, #f8d7da, #fce4ec);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc3545;
+    font-size: 3rem;
+}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Оформление заказа — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="fw-bold mb-4"><i class="bi bi-check-circle"></i> Оформление заказа</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Адрес доставки -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Адрес доставки</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                            <div class="text-danger small">{{ form.address.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Дата и время -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Дата и время доставки</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Дата доставки</label>
+                                {{ form.delivery_date }}
+                                {% if form.delivery_date.errors %}
+                                <div class="text-danger small">{{ form.delivery_date.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Доставка возможна начиная с завтрашнего дня</div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Время с</label>
+                                {{ form.delivery_time_from }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Время до</label>
+                                {{ form.delivery_time_to }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Комментарий -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Комментарий</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ form.comment }}
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-danger btn-lg w-100">
+                    <i class="bi bi-check-circle"></i> Подтвердить заказ
+                </button>
+            </form>
+        </div>
+        
+        <!-- Сводка заказа -->
+        <div class="col-md-4">
+            <div class="card shadow-sm sticky-top" style="top: 80px;">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Ваш заказ</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in items %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <small>{{ item.get_name }}</small>
+                            {% if item.quantity > 1 %}
+                            <span class="badge bg-light text-dark">×{{ item.quantity }}</span>
+                            {% endif %}
+                        </div>
+                        <span>{{ item.get_price }} ₽</span>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <!-- Промокод -->
+                    <form method="post" action="{% url 'flowerly:apply_promo' %}" class="mb-3">
+                        {% csrf_token %}
+                        <label class="form-label small">Промокод</label>
+                        <div class="input-group">
+                            {{ promo_form.code }}
+                            <button type="submit" class="btn btn-outline-danger">Применить</button>
+                        </div>
+                    </form>
+                    
+                    {% if request.session.promo_discount %}
+                    <div class="d-flex justify-content-between text-success mb-2">
+                        <small>Скидка по промокоду</small>
+                        <small>−{{ request.session.promo_discount }} ₽</small>
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Итого</span>
+                        <span class="text-danger">
+                            {% if request.session.promo_discount %}
+                                {{ total|add:request.session.promo_discount|floatformat:2 }} ₽
+                            {% else %}
+                                {{ total }} ₽
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

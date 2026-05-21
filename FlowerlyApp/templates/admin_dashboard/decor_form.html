@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} декор — Админ-панель — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-dark min-vh-100 p-3">
+            <h5 class="fw-bold mb-4 text-white"><i class="bi bi-shield-lock text-danger"></i> Админ-панель</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_decor' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-gift"></i> Декор
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="col-md-10 p-4 bg-light min-vh-100">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:admin_dashboard' %}">Дашборд</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:admin_decor' %}">Декор</a></li>
+                    <li class="breadcrumb-item active">{{ action }} декор</li>
+                </ol>
+            </nav>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ action }} декор</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Категория</label>
+                                    {{ form.category }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Название</label>
+                                    {{ form.name }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Цена (₽)</label>
+                                    {{ form.price }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Фото</label>
+                                    {{ form.image }}
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.available }}
+                                        <label class="form-check-label">В наличии</label>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-check-lg"></i> Сохранить
+                                </button>
+                                <a href="{% url 'flowerly:admin_decor' %}" class="btn btn-outline-secondary">Отмена</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

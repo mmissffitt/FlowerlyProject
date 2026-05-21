@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ bouquet.name }} — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'flowerly:home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'flowerly:catalog' %}">Каталог</a></li>
+            <li class="breadcrumb-item active">{{ bouquet.name }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Фото -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                {% if bouquet.image %}
+                <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" 
+                     style="height: 400px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <i class="bi bi-flower1 text-muted display-1"></i>
+                </div>
+                {% endif %}
+            </div>
+            {% if extra_images %}
+            <div class="row g-2 mt-2">
+                <div class="col-3">
+                    {% if bouquet.image %}
+                    <img src="{{ bouquet.image.url }}" class="img-thumbnail" style="height: 80px; object-fit: cover; cursor: pointer;">
+                    {% endif %}
+                </div>
+                {% for img in extra_images %}
+                <div class="col-3">
+                    {% if img.image %}
+                    <img src="{{ img.image.url }}" class="img-thumbnail" style="height: 80px; object-fit: cover; cursor: pointer;">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Информация -->
+        <div class="col-md-6">
+            <h1 class="fw-bold mb-2">{{ bouquet.name }}</h1>
+            
+            <!-- Рейтинг -->
+            <div class="mb-3">
+                <span class="text-warning">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= avg_rating|floatformat:"0" %}
+                            <i class="bi bi-star-fill"></i>
+                        {% else %}
+                            <i class="bi bi-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </span>
+                <span class="text-muted ms-2">{{ avg_rating|floatformat:1 }} ({{ reviews.count }} отзывов)</span>
+            </div>
+            
+            <!-- Цена -->
+            <p class="display-6 fw-bold text-danger mb-3">{{ bouquet.price }} ₽</p>
+            
+            <!-- Описание -->
+            <p class="text-muted mb-4">{{ bouquet.description|linebreaks }}</p>
+            
+            <!-- Характеристики -->
+            <div class="mb-4">
+                {% if bouquet.occasion %}
+                <span class="badge bg-light text-dark me-2 mb-2">
+                    <i class="bi bi-gift"></i> {{ bouquet.occasion.name }}
+                </span>
+                {% endif %}
+                {% if bouquet.color_palette %}
+                <span class="badge bg-light text-dark mb-2">
+                    <i class="bi bi-palette"></i> {{ bouquet.color_palette.name }}
+                </span>
+                {% endif %}
+            </div>
+            
+            <!-- Кнопки -->
+            <div class="d-flex gap-2 mb-4">
+            <form method="get" action="{% url 'flowerly:cart_add_bouquet' bouquet.id %}" class="flex-grow-1">
+                <button type="submit" class="btn btn-danger btn-lg w-100">
+                <i class="bi bi-cart-plus"></i> В корзину
+            </button>
+            </form>
+                <button class="btn btn-outline-danger btn-lg" onclick="toggleFavorite({{ bouquet.id }})" id="fav-btn">
+                    <i class="bi {% if is_favorite %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                </button>
+            </div>
+            
+            <!-- Доставка -->
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6><i class="bi bi-truck"></i> Доставка</h6>
+                    <p class="text-muted small mb-0">Доставка на следующий день и позже. Выберите удобное время при оформлении.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Отзывы -->
+    <div class="row mt-5">
+        <div class="col-md-8">
+            <h3 class="fw-bold mb-4">Отзывы ({{ reviews.count }})</h3>
+            
+            {% if can_review %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5>Оставить отзыв</h5>
+                    <a href="{% url 'flowerly:add_review' bouquet.id %}" class="btn btn-danger">Написать отзыв</a>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% for review in reviews %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <strong>{{ review.user.first_name }}</strong>
+                            <span class="text-warning ms-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
+                    </div>
+                    <p class="text-muted mb-0">{{ review.text }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-4">
+                <i class="bi bi-chat-square-text display-4 text-muted"></i>
+                <p class="text-muted mt-2">Пока нет отзывов. Будьте первым!</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Похожие букеты -->
+        {% if similar %}
+        <div class="col-md-4">
+            <h5 class="fw-bold mb-3">С этим также заказывают</h5>
+            {% for s in similar %}
+            <a href="{% url 'flowerly:bouquet_detail' s.slug %}" class="text-decoration-none">
+                <div class="card mb-3 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-4">
+                            {% if s.image %}
+                            <img src="{{ s.image.url }}" class="img-fluid rounded-start" style="height: 100px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100px;">
+                                <i class="bi bi-flower1 text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body py-2">
+                                <h6 class="card-title text-dark">{{ s.name }}</h6>
+                                <p class="text-danger fw-bold mb-0">{{ s.price }} ₽</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFavorite(bouquetId) {
+    fetch(`/favorite/toggle/${bouquetId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        const btn = document.getElementById('fav-btn');
+        const icon = btn.querySelector('i');
+        if (data.is_favorite) {
+            icon.className = 'bi bi-heart-fill';
+        } else {
+            icon.className = 'bi bi-heart';
+        }
+    });
+}
+</script>
+{% endblock %}

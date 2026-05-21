@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} промокод — Админ-панель — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-dark min-vh-100 p-3">
+            <h5 class="fw-bold mb-4 text-white"><i class="bi bi-shield-lock text-danger"></i> Админ-панель</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_promo' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-tags"></i> Промокоды
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="col-md-10 p-4 bg-light min-vh-100">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:admin_dashboard' %}">Дашборд</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:admin_promo' %}">Промокоды</a></li>
+                    <li class="breadcrumb-item active">{{ action }} промокод</li>
+                </ol>
+            </nav>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ action }} промокод</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Код</label>
+                                    {{ form.code }}
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Тип скидки</label>
+                                        {{ form.discount_type }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Значение</label>
+                                        {{ form.discount_value }}
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Минимальная сумма заказа</label>
+                                    {{ form.min_order_amount }}
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Действует с</label>
+                                        {{ form.valid_from }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Действует до</label>
+                                        {{ form.valid_to }}
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Лимит использований</label>
+                                        {{ form.usage_limit }}
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-end">
+                                        <div class="form-check">
+                                            {{ form.is_active }}
+                                            <label class="form-check-label">Активен</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-check-lg"></i> Сохранить
+                                </button>
+                                <a href="{% url 'flowerly:admin_promo' %}" class="btn btn-outline-secondary">Отмена</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

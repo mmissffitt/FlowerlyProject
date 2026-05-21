@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказ №{{ order.id }} — Панель флориста — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-light min-vh-100 p-3">
+            <h5 class="fw-bold mb-4"><i class="bi bi-flower2 text-danger"></i> Флорист</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_dashboard' %}" class="nav-link text-dark">
+                        <i class="bi bi-speedometer2"></i> Рабочий стол
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_orders' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-box"></i> Все заказы
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_availability' %}" class="nav-link text-dark">
+                        <i class="bi bi-check-circle"></i> Наличие
+                    </a>
+                </li>
+                <li class="nav-item mt-4">
+                    <a href="{% url 'flowerly:home' %}" class="nav-link text-muted">
+                        <i class="bi bi-arrow-left"></i> На сайт
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="col-md-10 p-4">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:florist_dashboard' %}">Рабочий стол</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:florist_orders' %}">Все заказы</a></li>
+                    <li class="breadcrumb-item active">Заказ №{{ order.id }}</li>
+                </ol>
+            </nav>
+            
+            <div class="row">
+                <!-- Основная информация -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-danger text-white">
+                            <h5 class="mb-0">Заказ №{{ order.id }}</h5>
+                            <span class="badge bg-light text-dark fs-6">{{ order.get_status_display }}</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Состав заказа -->
+                            <h6 class="fw-bold mb-3">Состав заказа:</h6>
+                            {% for item in items %}
+                            <div class="mb-3 pb-3 border-bottom">
+                                {% if item.ready_bouquet %}
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>Готовый букет: {{ item.ready_bouquet.name }}</strong>
+                                        <span class="badge bg-light text-dark ms-2">×{{ item.quantity }}</span>
+                                    </div>
+                                    <span class="fw-bold">{{ item.price }} ₽</span>
+                                </div>
+                                {% elif item.custom_bouquet %}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>Собранный букет №{{ item.custom_bouquet.id }}</strong>
+                                    <span class="fw-bold">{{ item.price }} ₽</span>
+                                </div>
+                                
+                                {% if item.custom_bouquet.flower_items.exists %}
+                                <h6 class="text-muted small mt-2">Цветы:</h6>
+                                <ul class="list-group list-group-flush mb-2">
+                                    {% for fi in item.custom_bouquet.flower_items.all %}
+                                    <li class="list-group-item py-1 px-0 d-flex justify-content-between">
+                                        <span>{{ fi.flower.name }} × {{ fi.quantity }}</span>
+                                        <span class="text-muted">{{ fi.price_at_moment }} ₽/шт = {{ fi.subtotal }} ₽</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                                
+                                {% if item.custom_bouquet.decor_items.exists %}
+                                <h6 class="text-muted small mt-2">Декор:</h6>
+                                <ul class="list-group list-group-flush mb-2">
+                                    {% for di in item.custom_bouquet.decor_items.all %}
+                                    <li class="list-group-item py-1 px-0 d-flex justify-content-between">
+                                        <span>{{ di.decor.name }} × {{ di.quantity }}</span>
+                                        <span class="text-muted">{{ di.price_at_moment }} ₽/шт = {{ di.subtotal }} ₽</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                                
+                                {% if item.custom_bouquet.notes %}
+                                <div class="alert alert-info mt-2 py-2">
+                                    <strong>Пожелание:</strong> {{ item.custom_bouquet.notes }}
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            
+                            {% if order.discount_amount > 0 %}
+                            <div class="d-flex justify-content-between text-success mb-2">
+                                <span>Скидка</span>
+                                <span>−{{ order.discount_amount }} ₽</span>
+                            </div>
+                            {% endif %}
+                            
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>Итого</span>
+                                <span class="text-danger">{{ order.total_price }} ₽</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Смена статуса -->
+                    {% if allowed_transitions %}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Сменить статус</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for next_status in allowed_transitions %}
+                                <form method="post" action="{% url 'flowerly:florist_change_status' order.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="new_status" value="{{ next_status }}">
+                                    {% if next_status == 'confirmed' %}
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Принять заказ
+                                    </button>
+                                    {% elif next_status == 'assembling' %}
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-gear"></i> Начать сборку
+                                    </button>
+                                    {% elif next_status == 'ready' %}
+                                    <button type="submit" class="btn btn-secondary">
+                                        <i class="bi bi-box-seam"></i> Букет готов
+                                    </button>
+                                    {% elif next_status == 'in_delivery' %}
+                                    <button type="submit" class="btn btn-info">
+                                        <i class="bi bi-truck"></i> Передать курьеру
+                                    </button>
+                                    {% elif next_status == 'delivered' %}
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle-fill"></i> Доставлен
+                                    </button>
+                                    {% elif next_status == 'cancelled' %}
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-x-circle"></i> Отменить
+                                    </button>
+                                    {% endif %}
+                                </form>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- История статусов -->
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h6 class="mb-0">История статусов</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                {% for history in status_history %}
+                                <li class="list-group-item d-flex justify-content-between px-0">
+                                    <span>
+                                        {{ history.get_status_display }}
+                                        {% if history.changed_by %}
+                                        <small class="text-muted">({{ history.changed_by.first_name }})</small>
+                                        {% endif %}
+                                    </span>
+                                    <small class="text-muted">{{ history.changed_at|date:"d.m.Y H:i" }}</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Информация о доставке -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-person"></i> Клиент</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1"><strong>{{ order.user.first_name }} {{ order.user.last_name }}</strong></p>
+                            <p class="mb-1"><i class="bi bi-telephone"></i> {{ order.user.phone }}</p>
+                            <p class="mb-0"><i class="bi bi-envelope"></i> {{ order.user.email }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-truck"></i> Доставка</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1"><strong>Адрес:</strong></p>
+                            <p class="text-muted mb-2">{{ order.address }}</p>
+                            <p class="mb-1"><strong>Дата:</strong> {{ order.delivery_date|date:"d.m.Y" }}</p>
+                            <p class="mb-0"><strong>Время:</strong> {{ order.delivery_time_from }} – {{ order.delivery_time_to }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if order.comment %}
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-chat-dots"></i> Комментарий</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-0">{{ order.comment }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

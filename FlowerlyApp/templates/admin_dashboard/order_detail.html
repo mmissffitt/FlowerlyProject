@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказ №{{ order.id }} — Админ-панель — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-dark min-vh-100 p-3">
+            <h5 class="fw-bold mb-4 text-white"><i class="bi bi-shield-lock text-danger"></i> Админ-панель</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_orders' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-box"></i> Заказы
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="col-md-10 p-4 bg-light min-vh-100">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:admin_dashboard' %}">Дашборд</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'flowerly:admin_orders' %}">Заказы</a></li>
+                    <li class="breadcrumb-item active">Заказ №{{ order.id }}</li>
+                </ol>
+            </nav>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-danger text-white">
+                            <h5 class="mb-0">Заказ №{{ order.id }}</h5>
+                            <span class="badge bg-light text-dark fs-6">{{ order.get_status_display }}</span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">Состав заказа:</h6>
+                            {% for item in items %}
+                            <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                <div>
+                                    <strong>{{ item.get_name }}</strong>
+                                    {% if item.quantity > 1 %}
+                                    <span class="badge bg-light text-dark">×{{ item.quantity }}</span>
+                                    {% endif %}
+                                </div>
+                                <span class="fw-bold">{{ item.price }} ₽</span>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if order.discount_amount > 0 %}
+                            <div class="d-flex justify-content-between text-success mb-2">
+                                <span>Скидка</span>
+                                <span>−{{ order.discount_amount }} ₽</span>
+                            </div>
+                            {% endif %}
+                            
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>Итого</span>
+                                <span class="text-danger">{{ order.total_price }} ₽</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- История статусов -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">История статусов</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                {% for h in status_history %}
+                                <li class="list-group-item d-flex justify-content-between px-0">
+                                    <span>{{ h.get_status_display }}
+                                        {% if h.changed_by %}<small class="text-muted">({{ h.changed_by.first_name }})</small>{% endif %}
+                                    </span>
+                                    <small class="text-muted">{{ h.changed_at|date:"d.m.Y H:i" }}</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Отмена заказа -->
+                    {% if order.status != 'cancelled' and order.status != 'delivered' %}
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h6 class="mb-0 text-danger">Отменить заказ</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'flowerly:admin_cancel_order' order.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label">Причина отмены</label>
+                                    <input type="text" name="reason" class="form-control" placeholder="Укажите причину">
+                                </div>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Отменить заказ №{{ order.id }}?')">
+                                    <i class="bi bi-x-circle"></i> Отменить заказ
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-person"></i> Клиент</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1"><strong>{{ order.user.first_name }} {{ order.user.last_name }}</strong></p>
+                            <p class="mb-1"><i class="bi bi-telephone"></i> {{ order.user.phone }}</p>
+                            <p class="mb-0"><i class="bi bi-envelope"></i> {{ order.user.email }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-truck"></i> Доставка</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1"><strong>Адрес:</strong> {{ order.address }}</p>
+                            <p class="mb-1"><strong>Дата:</strong> {{ order.delivery_date|date:"d.m.Y" }}</p>
+                            <p class="mb-0"><strong>Время:</strong> {{ order.delivery_time_from }} – {{ order.delivery_time_to }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if order.comment %}
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-chat-dots"></i> Комментарий</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-0">{{ order.comment }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if order.promo_code %}
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-tag"></i> Промокод</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0"><strong>{{ order.promo_code.code }}</strong> — скидка {{ order.discount_amount }} ₽</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

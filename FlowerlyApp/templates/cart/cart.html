@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Корзина — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="fw-bold mb-4"><i class="bi bi-cart3"></i> Корзина</h1>
+    
+    {% if items %}
+    <div class="row">
+        <div class="col-md-8">
+            {% for item in items %}
+            <div class="card mb-3 shadow-sm {% if item in unavailable_items %}border-warning{% endif %}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            {% if item.ready_bouquet and item.ready_bouquet.image %}
+                            <img src="{{ item.ready_bouquet.image.url }}" class="img-fluid rounded" 
+                                 style="height: 80px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                 style="height: 80px;">
+                                <i class="bi bi-flower1 text-muted display-6"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="mb-1">{{ item.get_name }}</h6>
+                            {% if item.custom_bouquet %}
+                            <small class="text-muted">{{ item.custom_bouquet.get_items_summary }}</small>
+                            {% endif %}
+                            {% if item in unavailable_items %}
+                            <span class="badge bg-warning text-dark">Недоступен</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">Кол-во:</span>
+                                <form method="post" action="{% url 'flowerly:cart_update' item.id %}" class="d-flex">
+                                    {% csrf_token %}
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99" 
+                                           class="form-control form-control-sm" style="width: 60px;" 
+                                           onchange="this.form.submit()">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <p class="fw-bold text-danger mb-0">{{ item.get_price }} ₽</p>
+                        </div>
+                        <div class="col-md-1 text-end">
+                            <a href="{% url 'flowerly:cart_remove' item.id %}" class="btn btn-sm text-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm sticky-top" style="top: 80px;">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Итого</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Товары ({{ items.count }})</span>
+                        <span>{{ total }} ₽</span>
+                    </div>
+                    {% if request.session.promo_discount %}
+                    <div class="d-flex justify-content-between text-success mb-2">
+                        <span>Скидка</span>
+                        <span>−{{ request.session.promo_discount }} ₽</span>
+                    </div>
+                    {% endif %}
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                        <span>К оплате</span>
+                        <span class="text-danger">{{ total }} ₽</span>
+                    </div>
+                    
+                    {% if unavailable_items %}
+                    <div class="alert alert-warning small mb-3">
+                        <i class="bi bi-exclamation-triangle"></i> Некоторые товары недоступны. Удалите их, чтобы продолжить.
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{% url 'flowerly:checkout' %}" 
+                       class="btn btn-danger w-100 btn-lg {% if unavailable_items %}disabled{% endif %}">
+                        <i class="bi bi-check-circle"></i> Оформить заказ
+                    </a>
+                    
+                    <a href="{% url 'flowerly:catalog' %}" class="btn btn-outline-secondary w-100 mt-2">
+                        Продолжить покупки
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-cart-x display-1 text-muted"></i>
+        <h3 class="text-muted mt-3">Корзина пуста</h3>
+        <p class="text-muted">Добавьте букеты из каталога или соберите свой в конструкторе</p>
+        <div class="mt-4">
+            <a href="{% url 'flowerly:catalog' %}" class="btn btn-danger btn-lg me-2">
+                <i class="bi bi-grid"></i> В каталог
+            </a>
+            <a href="{% url 'flowerly:constructor' %}" class="btn btn-outline-danger btn-lg">
+                <i class="bi bi-puzzle"></i> В конструктор
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

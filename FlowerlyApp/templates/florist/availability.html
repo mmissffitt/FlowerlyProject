@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Управление наличием — Панель флориста — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-light min-vh-100 p-3">
+            <h5 class="fw-bold mb-4"><i class="bi bi-flower2 text-danger"></i> Флорист</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_dashboard' %}" class="nav-link text-dark">
+                        <i class="bi bi-speedometer2"></i> Рабочий стол
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_orders' %}" class="nav-link text-dark">
+                        <i class="bi bi-box"></i> Все заказы
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_availability' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-check-circle"></i> Наличие
+                    </a>
+                </li>
+                <li class="nav-item mt-4">
+                    <a href="{% url 'flowerly:home' %}" class="nav-link text-muted">
+                        <i class="bi bi-arrow-left"></i> На сайт
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="col-md-10 p-4">
+            <h2 class="fw-bold mb-4">Управление наличием</h2>
+            
+            <!-- Цветы -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-flower1"></i> Цветы</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Фото</th>
+                                    <th>Название</th>
+                                    <th>Категория</th>
+                                    <th>Цена</th>
+                                    <th>В наличии</th>
+                                    <th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for flower in flowers %}
+                                <tr>
+                                    <td>
+                                        <img src="{{ flower.image.url }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                    </td>
+                                    <td>{{ flower.name }}</td>
+                                    <td>{{ flower.category.name }}</td>
+                                    <td>{{ flower.price }} ₽</td>
+                                    <td>
+                                        {% if flower.available %}
+                                        <span class="badge bg-success">Есть</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Нет</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm toggle-availability-btn {% if flower.available %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                                                data-type="flower" data-id="{{ flower.id }}">
+                                            {% if flower.available %}
+                                            <i class="bi bi-x-circle"></i> Нет в наличии
+                                            {% else %}
+                                            <i class="bi bi-check-circle"></i> Есть в наличии
+                                            {% endif %}
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Декор -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-gift"></i> Декор</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Фото</th>
+                                    <th>Название</th>
+                                    <th>Категория</th>
+                                    <th>Цена</th>
+                                    <th>В наличии</th>
+                                    <th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for decor in decors %}
+                                <tr>
+                                    <td>
+                                        <img src="{{ decor.image.url }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                    </td>
+                                    <td>{{ decor.name }}</td>
+                                    <td>{{ decor.category.name }}</td>
+                                    <td>{{ decor.price }} ₽</td>
+                                    <td>
+                                        {% if decor.available %}
+                                        <span class="badge bg-success">Есть</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Нет</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm toggle-availability-btn {% if decor.available %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                                                data-type="decor" data-id="{{ decor.id }}">
+                                            {% if decor.available %}
+                                            <i class="bi bi-x-circle"></i> Нет в наличии
+                                            {% else %}
+                                            <i class="bi bi-check-circle"></i> Есть в наличии
+                                            {% endif %}
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.toggle-availability-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.dataset.type;
+            const id = this.dataset.id;
+            
+            fetch(`/florist/availability/toggle/${type}/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

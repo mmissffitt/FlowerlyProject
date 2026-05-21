@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Отзывы — Админ-панель — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-dark min-vh-100 p-3">
+            <h5 class="fw-bold mb-4 text-white"><i class="bi bi-shield-lock text-danger"></i> Админ-панель</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_dashboard' %}" class="nav-link text-white">
+                        <i class="bi bi-speedometer2"></i> Дашборд
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_flowers' %}" class="nav-link text-white">
+                        <i class="bi bi-flower1"></i> Цветы
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_decor' %}" class="nav-link text-white">
+                        <i class="bi bi-gift"></i> Декор
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_bouquets' %}" class="nav-link text-white">
+                        <i class="bi bi-flower2"></i> Букеты
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_orders' %}" class="nav-link text-white">
+                        <i class="bi bi-box"></i> Заказы
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_promo' %}" class="nav-link text-white">
+                        <i class="bi bi-tags"></i> Промокоды
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_reviews' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-star"></i> Отзывы
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="col-md-10 p-4 bg-light min-vh-100">
+            <h2 class="fw-bold mb-4">Отзывы</h2>
+            
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Пользователь</th>
+                                    <th>Букет</th>
+                                    <th>Оценка</th>
+                                    <th>Текст</th>
+                                    <th>Дата</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for review in reviews %}
+                                <tr>
+                                    <td>#{{ review.id }}</td>
+                                    <td>{{ review.user.first_name }} {{ review.user.last_name }}</td>
+                                    <td>{{ review.ready_bouquet.name }}</td>
+                                    <td>
+                                        <span class="text-warning">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= review.rating %}
+                                                <i class="bi bi-star-fill"></i>
+                                                {% else %}
+                                                <i class="bi bi-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+                                    </td>
+                                    <td>{{ review.text|truncatechars:80 }}</td>
+                                    <td>{{ review.created_at|date:"d.m.Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'flowerly:admin_review_delete' review.id %}" class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Удалить отзыв #{{ review.id }}?')">
+                                            <i class="bi bi-trash"></i> Удалить
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">Отзывов пока нет</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

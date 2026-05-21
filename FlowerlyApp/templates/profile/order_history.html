@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои заказы — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="list-group shadow-sm">
+                <a href="{% url 'flowerly:profile' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-person"></i> Обзор
+                </a>
+                <a href="{% url 'flowerly:profile_edit' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-pencil"></i> Редактировать профиль
+                </a>
+                <a href="{% url 'flowerly:order_history' %}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-box"></i> Мои заказы
+                </a>
+                <a href="{% url 'flowerly:favorites' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-heart"></i> Избранное
+                </a>
+                <a href="{% url 'flowerly:my_reviews' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-star"></i> Мои отзывы
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2 class="fw-bold mb-4">Мои заказы</h2>
+            
+            <p class="text-muted mb-4">Всего заказов: {{ orders.count }}</p>
+            
+            {% if orders %}
+            <div class="table-responsive shadow-sm">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Номер</th>
+                            <th>Дата создания</th>
+                            <th>Дата доставки</th>
+                            <th>Сумма</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td><strong>№{{ order.id }}</strong></td>
+                            <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ order.delivery_date|date:"d.m.Y" }}</td>
+                            <td class="fw-bold">{{ order.total_price }} ₽</td>
+                            <td>
+                                <span class="badge 
+                                    {% if order.status == 'new' %}bg-primary
+                                    {% elif order.status == 'confirmed' %}bg-info text-dark
+                                    {% elif order.status == 'assembling' %}bg-warning text-dark
+                                    {% elif order.status == 'ready' %}bg-secondary
+                                    {% elif order.status == 'in_delivery' %}bg-info
+                                    {% elif order.status == 'delivered' %}bg-success
+                                    {% elif order.status == 'cancelled' %}bg-danger
+                                    {% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'flowerly:order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye"></i> Детали
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">Заказов пока нет</h4>
+                <p class="text-muted">Здесь появятся ваши заказы</p>
+                <a href="{% url 'flowerly:catalog' %}" class="btn btn-danger">Перейти в каталог</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

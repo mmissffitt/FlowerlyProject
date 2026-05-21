@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель флориста — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Боковое меню -->
+        <div class="col-md-2 bg-light min-vh-100 p-3">
+            <h5 class="fw-bold mb-4"><i class="bi bi-flower2 text-danger"></i> Флорист</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_dashboard' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-speedometer2"></i> Рабочий стол
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_orders' %}" class="nav-link text-dark">
+                        <i class="bi bi-box"></i> Все заказы
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:florist_availability' %}" class="nav-link text-dark">
+                        <i class="bi bi-check-circle"></i> Наличие
+                    </a>
+                </li>
+                <li class="nav-item mt-4">
+                    <a href="{% url 'flowerly:home' %}" class="nav-link text-muted">
+                        <i class="bi bi-arrow-left"></i> На сайт
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Основной контент -->
+        <div class="col-md-10 p-4">
+            <h2 class="fw-bold mb-4">Рабочий стол флориста</h2>
+            
+            <!-- Статистика -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-danger text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-box display-5"></i>
+                            <h3 class="mt-2">{{ active_orders_count }}</h3>
+                            <p class="mb-0">Активных заказов</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-warning text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-calendar-check display-5"></i>
+                            <h3 class="mt-2">{{ today_orders.count }}</h3>
+                            <p class="mb-0">Заказов на сегодня</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-info text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-calendar-plus display-5"></i>
+                            <h3 class="mt-2">{{ tomorrow_orders.count }}</h3>
+                            <p class="mb-0">Заказов на завтра</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Заказы на сегодня -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Заказы на сегодня ({{ today_orders.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if today_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Номер</th>
+                                    <th>Клиент</th>
+                                    <th>Время</th>
+                                    <th>Адрес</th>
+                                    <th>Сумма</th>
+                                    <th>Статус</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in today_orders %}
+                                <tr>
+                                    <td><strong>№{{ order.id }}</strong></td>
+                                    <td>{{ order.user.first_name }}</td>
+                                    <td>{{ order.delivery_time_from }} – {{ order.delivery_time_to }}</td>
+                                    <td><small>{{ order.address|truncatechars:30 }}</small></td>
+                                    <td class="fw-bold">{{ order.total_price }} ₽</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if order.status == 'new' %}bg-primary
+                                            {% elif order.status == 'confirmed' %}bg-info text-dark
+                                            {% elif order.status == 'assembling' %}bg-warning text-dark
+                                            {% elif order.status == 'ready' %}bg-secondary
+                                            {% elif order.status == 'in_delivery' %}bg-info
+                                            {% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'flowerly:florist_order_detail' order.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">На сегодня заказов нет</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Заказы на завтра -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Заказы на завтра ({{ tomorrow_orders.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if tomorrow_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Номер</th>
+                                    <th>Клиент</th>
+                                    <th>Время</th>
+                                    <th>Адрес</th>
+                                    <th>Сумма</th>
+                                    <th>Статус</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in tomorrow_orders %}
+                                <tr>
+                                    <td><strong>№{{ order.id }}</strong></td>
+                                    <td>{{ order.user.first_name }}</td>
+                                    <td>{{ order.delivery_time_from }} – {{ order.delivery_time_to }}</td>
+                                    <td><small>{{ order.address|truncatechars:30 }}</small></td>
+                                    <td class="fw-bold">{{ order.total_price }} ₽</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if order.status == 'new' %}bg-primary
+                                            {% elif order.status == 'confirmed' %}bg-info text-dark
+                                            {% elif order.status == 'assembling' %}bg-warning text-dark
+                                            {% elif order.status == 'ready' %}bg-secondary
+                                            {% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'flowerly:florist_order_detail' order.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">На завтра заказов пока нет</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

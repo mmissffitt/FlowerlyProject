@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Каталог букетов — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="fw-bold mb-4">Каталог букетов</h1>
+    
+    <div class="row">
+        <!-- Фильтры -->
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Фильтры</h5>
+                    <form method="get" id="filter-form">
+                        <!-- Повод -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Повод</label>
+                            <select name="occasion" class="form-select" onchange="this.form.submit()">
+                                <option value="">Все поводы</option>
+                                {% for occasion in occasions %}
+                                <option value="{{ occasion.slug }}" {% if current_occasion == occasion.slug %}selected{% endif %}>
+                                    {{ occasion.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Цветовая гамма -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Цветовая гамма</label>
+                            <select name="color" class="form-select" onchange="this.form.submit()">
+                                <option value="">Все цвета</option>
+                                {% for color in colors %}
+                                <option value="{{ color.slug }}" {% if current_color == color.slug %}selected{% endif %}>
+                                    {{ color.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Цена -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Цена</label>
+                            <div class="row g-2">
+                                <div class="col">
+                                    <input type="number" name="min_price" class="form-control" placeholder="От" 
+                                           value="{{ current_min_price }}">
+                                </div>
+                                <div class="col">
+                                    <input type="number" name="max_price" class="form-control" placeholder="До" 
+                                           value="{{ current_max_price }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-danger w-100">Применить</button>
+                        {% if current_occasion or current_color or current_min_price or current_max_price %}
+                        <a href="{% url 'flowerly:catalog' %}" class="btn btn-outline-secondary w-100 mt-2">Сбросить</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Сетка букетов -->
+        <div class="col-md-9">
+            <!-- Сортировка -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="text-muted mb-0">Найдено: {{ bouquets.count }} букетов</p>
+                <select name="sort" class="form-select w-auto" onchange="window.location.href='?sort=' + this.value + '&occasion={{ current_occasion }}&color={{ current_color }}&min_price={{ current_min_price }}&max_price={{ current_max_price }}'">
+                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Новинки</option>
+                    <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Цена: по возрастанию</option>
+                    <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Цена: по убыванию</option>
+                    <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Популярные</option>
+                </select>
+            </div>
+            
+            <!-- Букеты -->
+            <div class="row g-4">
+                {% for bouquet in bouquets %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="position-relative">
+                            {% if bouquet.image %}
+                            <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" 
+                                 style="height: 250px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                <i class="bi bi-flower1 text-muted display-3"></i>
+                            </div>
+                            {% endif %}
+                            {% if bouquet.is_hit %}
+                            <span class="position-absolute top-0 start-0 badge bg-danger m-2">ХИТ</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ bouquet.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                {% if bouquet.occasion %}{{ bouquet.occasion.name }}{% endif %}
+                                {% if bouquet.color_palette %} • {{ bouquet.color_palette.name }}{% endif %}
+                            </p>
+                            <div class="mt-auto">
+                                <p class="fw-bold text-danger fs-5 mb-2">{{ bouquet.price }} ₽</p>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'flowerly:bouquet_detail' bouquet.slug %}" 
+                                       class="btn btn-outline-danger btn-sm">Подробнее</a>
+                                    <a href="{% url 'flowerly:cart_add_bouquet' bouquet.id %}?next=catalog" 
+                                       class="btn btn-danger btn-sm">
+                                        <i class="bi bi-cart-plus"></i> В корзину
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-emoji-frown display-1 text-muted"></i>
+                    <h4 class="text-muted mt-3">Букеты не найдены</h4>
+                    <p>Попробуйте изменить параметры фильтра</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

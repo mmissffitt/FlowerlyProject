@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель администратора — Flowerly{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Боковое меню -->
+        <div class="col-md-2 bg-dark min-vh-100 p-3">
+            <h5 class="fw-bold mb-4 text-white"><i class="bi bi-shield-lock text-danger"></i> Админ-панель</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_dashboard' %}" class="nav-link active bg-danger text-white rounded">
+                        <i class="bi bi-speedometer2"></i> Дашборд
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_flowers' %}" class="nav-link text-white">
+                        <i class="bi bi-flower1"></i> Цветы
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_decor' %}" class="nav-link text-white">
+                        <i class="bi bi-gift"></i> Декор
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_bouquets' %}" class="nav-link text-white">
+                        <i class="bi bi-flower2"></i> Букеты
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_orders' %}" class="nav-link text-white">
+                        <i class="bi bi-box"></i> Заказы
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_promo' %}" class="nav-link text-white">
+                        <i class="bi bi-tags"></i> Промокоды
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'flowerly:admin_reviews' %}" class="nav-link text-white">
+                        <i class="bi bi-star"></i> Отзывы
+                    </a>
+                </li>
+                <li class="nav-item mt-4">
+                    <a href="{% url 'flowerly:home' %}" class="nav-link text-muted">
+                        <i class="bi bi-arrow-left"></i> На сайт
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Основной контент -->
+        <div class="col-md-10 p-4 bg-light min-vh-100">
+            <h2 class="fw-bold mb-4">Дашборд</h2>
+            
+            <!-- Карточки статистики -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm bg-primary text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-cart-check display-5"></i>
+                            <h3 class="mt-2">{{ today_orders_count }}</h3>
+                            <p class="mb-0">Заказов сегодня</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm bg-warning text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-gear display-5"></i>
+                            <h3 class="mt-2">{{ active_orders_count }}</h3>
+                            <p class="mb-0">В работе</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-cash-stack display-5"></i>
+                            <h3 class="mt-2">{{ today_revenue }} ₽</h3>
+                            <p class="mb-0">Выручка сегодня</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm bg-info text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-calendar-month display-5"></i>
+                            <h3 class="mt-2">{{ month_revenue }} ₽</h3>
+                            <p class="mb-0">Выручка за месяц</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- График заказов -->
+                <div class="col-md-8 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">Заказы за последние 7 дней</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="ordersChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Популярные букеты -->
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">Популярные букеты</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if popular_bouquets %}
+                            <ul class="list-group list-group-flush">
+                                {% for bouquet in popular_bouquets %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <strong>{{ bouquet.name }}</strong>
+                                        <br><small class="text-muted">{{ bouquet.price }} ₽</small>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill">{{ bouquet.order_count }} заказов</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <p class="text-muted text-center py-3">Нет данных</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Быстрые ссылки -->
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{% url 'flowerly:admin_flowers' %}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm bg-light">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-flower1 display-4 text-danger"></i>
+                                <h6 class="mt-2 text-dark">Управление цветами</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'flowerly:admin_bouquets' %}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm bg-light">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-flower2 display-4 text-danger"></i>
+                                <h6 class="mt-2 text-dark">Управление букетами</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'flowerly:admin_promo' %}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm bg-light">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-tags display-4 text-danger"></i>
+                                <h6 class="mt-2 text-dark">Промокоды</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'flowerly:admin_reviews' %}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm bg-light">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-star display-4 text-danger"></i>
+                                <h6 class="mt-2 text-dark">Отзывы</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('ordersChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: 'Заказы',
+                    data: {{ chart_data|safe }},
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#dc3545',
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
