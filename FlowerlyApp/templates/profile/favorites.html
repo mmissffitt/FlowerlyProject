@@ -34,8 +34,14 @@
                 <div class="col-md-4">
                     <div class="card h-100 shadow-sm border-0">
                         <div class="position-relative">
+                            {% if fav.ready_bouquet.image %}
                             <img src="{{ fav.ready_bouquet.image.url }}" class="card-img-top" alt="{{ fav.ready_bouquet.name }}" 
                                  style="height: 200px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-flower1 text-muted display-4"></i>
+                            </div>
+                            {% endif %}
                             <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm"
                                     onclick="toggleFavorite({{ fav.ready_bouquet.id }})">
                                 <i class="bi bi-heart-fill text-danger"></i>
