@@ -4,10 +4,10 @@
 {% block title %}Flowerly — доставка цветов{% endblock %}
 
 {% block content %}
-<section class="hero-section text-center py-5" style="background: linear-gradient(135deg, rgba(252, 228, 236, 0.85), rgba(248, 187, 208, 0.4)), url('{% static "images/hero-bg.jpg" %}') center/cover no-repeat;">
+<section class="hero-section text-center py-5" style="background: linear-gradient(135deg, rgba(252, 228, 236, 0.7), rgba(248, 187, 208, 0.7)), url('{% static "images/hero-bg.jpg" %}') center/cover no-repeat;">
     <div class="container">
         <h1 class="display-4 fw-bold mb-3">Цветы с душой и доставкой</h1>
-        <p class="lead mb-4">Соберите уникальный букет в конструкторе или выберите готовую композицию</p>
+        <p class="lead mb-4" style="color: #4a1525;">Соберите уникальный букет в конструкторе или выберите готовую композицию</p>
         <div class="d-flex justify-content-center gap-3">
             <a href="{% url 'flowerly:catalog' %}" class="btn btn-danger btn-lg">
                 <i class="bi bi-grid"></i> Смотреть каталог
