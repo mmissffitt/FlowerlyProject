@@ -250,39 +250,46 @@ main {
   color: #ffc107;
 }
 
-/* --- Панель флориста — боковое меню --- */
-.bg-light .nav-link {
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 2px;
-  font-weight: 500;
-}
-
-.bg-light .nav-link:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: var(--flowerly-primary) !important;
-}
-
-.bg-light .nav-link.active {
-  font-weight: 600;
-}
-
-/* --- Админ-панель — боковое меню --- */
+/* --- Боковое меню админа (тёмное) --- */
 .bg-dark .nav-link {
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 2px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+    color: rgba(255, 255, 255, 0.8) !important;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 2px;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 .bg-dark .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff !important;
+    background-color: rgba(220, 53, 69, 0.3) !important;
+    color: #fff !important;
 }
 
 .bg-dark .nav-link.active {
-  font-weight: 600;
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* --- Боковое меню флориста (светлое) --- */
+.bg-light .nav-link {
+    color: #333 !important;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 2px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.bg-light .nav-link:hover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}
+
+.bg-light .nav-link.active {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    font-weight: 600;
 }
 
 /* --- Анимации --- */
@@ -409,7 +416,15 @@ footer a:hover {
 }
 
 .sticky-top {
-  z-index: 1020;
+  z-index: 100;
+}
+
+.navbar {
+    z-index: 1030 !important;
+}
+
+.navbar .dropdown-menu {
+    z-index: 1040 !important;
 }
 
 .shadow-sm {
@@ -478,3 +493,4 @@ footer a:hover {
     color: #dc3545;
     font-size: 3rem;
 }
+

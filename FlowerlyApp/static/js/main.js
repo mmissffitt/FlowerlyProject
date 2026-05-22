@@ -18,23 +18,35 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// --- Обновление счётчика корзины ---
+function updateCartCount() {
+    fetch('/cart/count/', {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+        const badge = document.querySelector('.navbar .badge');
+        if (badge) {
+            if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.style.display = '';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    });
+}
+
 // --- Автоматическое скрытие алертов ---
 document.addEventListener('DOMContentLoaded', function() {
     const alerts = document.querySelectorAll('.alert-dismissible');
     alerts.forEach(alert => {
         setTimeout(() => {
             const closeBtn = alert.querySelector('.btn-close');
-            if (closeBtn) {
-                closeBtn.click();
-            }
+            if (closeBtn) closeBtn.click();
         }, 5000);
     });
 });
-
-// --- Подтверждение удаления ---
-function confirmDelete(message) {
-    return confirm(message || 'Вы уверены, что хотите удалить этот элемент?');
-}
 
 // --- Scroll to top button ---
 document.addEventListener('DOMContentLoaded', function() {
@@ -56,153 +68,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// --- Автоматическая отправка формы при изменении select ---
-document.addEventListener('DOMContentLoaded', function() {
-    const autoSubmitSelects = document.querySelectorAll('select[onchange="this.form.submit()"]');
-    autoSubmitSelects.forEach(select => {
-        select.addEventListener('change', function() {
-            this.form.submit();
-        });
-    });
-});
-
-// --- Избранное (toggle favorite) ---
-function toggleFavorite(bouquetId) {
-    fetch(`/favorite/toggle/${bouquetId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const allFavBtns = document.querySelectorAll(`[onclick="toggleFavorite(${bouquetId})"]`);
-            allFavBtns.forEach(btn => {
-                const icon = btn.querySelector('i');
-                if (icon) {
-                    if (data.is_favorite) {
-                        icon.className = 'bi bi-heart-fill';
-                    } else {
-                        icon.className = 'bi bi-heart';
-                    }
-                }
-            });
-        }
-    });
-}
-
 // --- Форматирование чисел ---
 function formatPrice(price) {
     return parseFloat(price).toLocaleString('ru-RU', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2
     }) + ' ₽';
-}
-
-// --- Дебаунс для поиска ---
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// --- Плавная прокрутка к элементу ---
-function scrollToElement(elementId) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
-
-// --- Обработка ошибок fetch ---
-function handleFetchError(error) {
-    console.error('Ошибка запроса:', error);
-    alert('Произошла ошибка. Пожалуйста, попробуйте позже.');
-}
-
-// --- Инициализация всех tooltips Bootstrap ---
-document.addEventListener('DOMContentLoaded', function() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
-
-// --- Инициализация всех popovers Bootstrap ---
-document.addEventListener('DOMContentLoaded', function() {
-    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
-});
-
-// --- Валидация форм на клиенте ---
-document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('.needs-validation');
-    forms.forEach(form => {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        });
-    });
-});
-
-// --- Предпросмотр загружаемого изображения ---
-function previewImage(input, previewId) {
-    const preview = document.getElementById(previewId);
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-// --- Таймер обратного отсчёта (для акций) ---
-function startCountdown(elementId, endDate) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-
-    function updateTimer() {
-        const now = new Date().getTime();
-        const distance = new Date(endDate).getTime() - now;
-
-        if (distance < 0) {
-            element.innerHTML = 'Акция завершена';
-            return;
-        }
-
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        element.innerHTML = `${days}д ${hours}ч ${minutes}м ${seconds}с`;
-    }
-
-    updateTimer();
-    setInterval(updateTimer, 1000);
-}
-
-// --- Копирование текста в буфер обмена ---
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-        alert('Скопировано в буфер обмена!');
-    }).catch(function() {
-        alert('Не удалось скопировать');
-    });
 }
 
 // --- Маска для телефона ---
@@ -214,9 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value.length > 0 && value[0] !== '7' && value[0] !== '8') {
                 value = '7' + value;
             }
-            if (value.length > 11) {
-                value = value.slice(0, 11);
-            }
+            if (value.length > 11) value = value.slice(0, 11);
             
             let formatted = '+7 ';
             if (value.length > 1) formatted += '(' + value.slice(1, 4);
@@ -228,8 +97,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-// --- Добавление товара в корзину (заглушка) ---
-function addToCart(bouquetId) {
-    alert('Функция добавления в корзину через API будет реализована позже. Пока используйте кнопку на странице букета.');
-}

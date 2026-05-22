@@ -99,4 +99,5 @@ urlpatterns = [
     # Управление отзывами
     path('admin-dashboard/reviews/', views.admin_reviews, name='admin_reviews'),
     path('admin-dashboard/reviews/<int:review_id>/delete/', views.admin_review_delete, name='admin_review_delete'),
+    path('cart/count/', views.cart_count, name='cart_count'),
 ]

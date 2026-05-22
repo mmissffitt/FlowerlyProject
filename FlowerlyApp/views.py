@@ -258,14 +258,12 @@ def constructor(request):
 
 @require_POST
 def constructor_add_flower(request):
-    """AJAX: добавить цветок в конструктор"""
     data = json.loads(request.body)
     flower_id = str(data.get('flower_id'))
     quantity = int(data.get('quantity', 1))
 
     flower = get_object_or_404(Flower, id=flower_id, available=True)
 
-    # Инициализируем сессию, если её нет
     if 'constructor_bouquet' not in request.session:
         request.session['constructor_bouquet'] = {'flowers': {}, 'decors': {}, 'notes': ''}
 
@@ -278,31 +276,23 @@ def constructor_add_flower(request):
             'name': flower.name,
             'price': float(flower.price),
             'quantity': quantity,
-            'image_url': flower.image.url if flower.image else '',
         }
 
     request.session.modified = True
 
-    # Пересчитываем итог
-    total = sum(
-        item['quantity'] * item['price']
-        for item in bouquet['flowers'].values()
-    ) + sum(
-        item['quantity'] * item['price']
-        for item in bouquet['decors'].values()
-    )
+    total = sum(v['quantity'] * v['price'] for v in bouquet['flowers'].values()) + \
+            sum(v['quantity'] * v['price'] for v in bouquet['decors'].values())
 
     return JsonResponse({
         'success': True,
+        'flowers': bouquet['flowers'],
+        'decors': bouquet['decors'],
         'total': round(total, 2),
-        'items_count': len(bouquet['flowers']) + len(bouquet['decors']),
-        'flower': bouquet['flowers'][flower_id],
     })
 
 
 @require_POST
 def constructor_remove_flower(request):
-    """AJAX: удалить цветок из конструктора"""
     data = json.loads(request.body)
     flower_id = str(data.get('flower_id'))
 
@@ -312,12 +302,18 @@ def constructor_remove_flower(request):
             del bouquet['flowers'][flower_id]
         request.session.modified = True
 
-    return JsonResponse({'success': True})
+    total = sum(v['quantity'] * v['price'] for v in bouquet['flowers'].values()) + \
+            sum(v['quantity'] * v['price'] for v in bouquet['decors'].values())
 
+    return JsonResponse({
+        'success': True,
+        'flowers': bouquet['flowers'],
+        'decors': bouquet['decors'],
+        'total': round(total, 2),
+    })
 
 @require_POST
 def constructor_add_decor(request):
-    """AJAX: добавить декор в конструктор"""
     data = json.loads(request.body)
     decor_id = str(data.get('decor_id'))
     quantity = int(data.get('quantity', 1))
@@ -336,30 +332,22 @@ def constructor_add_decor(request):
             'name': decor.name,
             'price': float(decor.price),
             'quantity': quantity,
-            'image_url': decor.image.url if decor.image else '',
         }
 
     request.session.modified = True
 
-    total = sum(
-        item['quantity'] * item['price']
-        for item in bouquet['flowers'].values()
-    ) + sum(
-        item['quantity'] * item['price']
-        for item in bouquet['decors'].values()
-    )
+    total = sum(v['quantity'] * v['price'] for v in bouquet['flowers'].values()) + \
+            sum(v['quantity'] * v['price'] for v in bouquet['decors'].values())
 
     return JsonResponse({
         'success': True,
+        'flowers': bouquet['flowers'],
+        'decors': bouquet['decors'],
         'total': round(total, 2),
-        'items_count': len(bouquet['flowers']) + len(bouquet['decors']),
-        'decor': bouquet['decors'][decor_id],
     })
-
 
 @require_POST
 def constructor_remove_decor(request):
-    """AJAX: удалить декор из конструктора"""
     data = json.loads(request.body)
     decor_id = str(data.get('decor_id'))
 
@@ -369,8 +357,15 @@ def constructor_remove_decor(request):
             del bouquet['decors'][decor_id]
         request.session.modified = True
 
-    return JsonResponse({'success': True})
+    total = sum(v['quantity'] * v['price'] for v in bouquet['flowers'].values()) + \
+            sum(v['quantity'] * v['price'] for v in bouquet['decors'].values())
 
+    return JsonResponse({
+        'success': True,
+        'flowers': bouquet['flowers'],
+        'decors': bouquet['decors'],
+        'total': round(total, 2),
+    })
 
 @login_required
 @require_POST
@@ -681,9 +676,13 @@ def order_history(request):
         orders = orders.filter(status=status_filter)
 
     orders = orders.order_by('-created_at')
+    
+    active_orders = orders.exclude(status__in=['delivered', 'cancelled'])
+    completed_orders = orders.filter(status__in=['delivered', 'cancelled'])
 
     context = {
-        'orders': orders,
+        'active_orders': active_orders,
+        'completed_orders': completed_orders,
         'current_status': status_filter,
         'status_choices': Order.STATUS_CHOICES,
     }
@@ -836,7 +835,7 @@ def florist_orders(request):
     date_filter = request.GET.get('date', '')
     search = request.GET.get('search', '')
 
-    orders = Order.objects.all().order_by('delivery_date', 'delivery_time_from')
+    orders = Order.objects.all().order_by('delivery_date', 'delivery_time_slot')
 
     if status_filter:
         orders = orders.filter(status=status_filter)
@@ -1214,9 +1213,21 @@ def cart_add_bouquet(request, bouquet_id):
         CartItem.objects.create(cart=cart, ready_bouquet=bouquet, quantity=1)
         messages.success(request, f'Букет «{bouquet.name}» добавлен в корзину')
     
-    # Если пришёл с карточки букета — остаёмся на ней
-    # Если из каталога — идём в корзину
     next_url = request.GET.get('next', '')
     if next_url == 'cart':
         return redirect('flowerly:cart_detail')
-    return redirect('flowerly:bouquet_detail', slug=bouquet.slug)
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer:
+     return redirect(referer)
+    return redirect('flowerly:catalog')
+
+def cart_count(request):
+    """API для получения количества товаров в корзине"""
+    count = 0
+    if request.user.is_authenticated:
+        try:
+            cart = Cart.objects.get(user=request.user)
+            count = cart.total_items()
+        except Cart.DoesNotExist:
+            pass
+    return JsonResponse({'count': count})

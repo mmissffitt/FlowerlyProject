@@ -28,9 +28,58 @@
         <div class="col-md-9">
             <h2 class="fw-bold mb-4">Мои заказы</h2>
             
-            <p class="text-muted mb-4">Всего заказов: {{ orders.count }}</p>
+            <!-- Активные заказы -->
+            <h5 class="mb-3 text-danger"><i class="bi bi-hourglass-split"></i> Активные</h5>
             
-            {% if orders %}
+            {% if active_orders %}
+            <div class="table-responsive shadow-sm mb-4">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Номер</th>
+                            <th>Дата создания</th>
+                            <th>Дата доставки</th>
+                            <th>Сумма</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in active_orders %}
+                        <tr>
+                            <td><strong>№{{ order.id }}</strong></td>
+                            <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ order.delivery_date|date:"d.m.Y" }}</td>
+                            <td class="fw-bold">{{ order.total_price }} ₽</td>
+                            <td>
+                                <span class="badge 
+                                    {% if order.status == 'new' %}bg-primary
+                                    {% elif order.status == 'confirmed' %}bg-info text-dark
+                                    {% elif order.status == 'assembling' %}bg-warning text-dark
+                                    {% elif order.status == 'ready' %}bg-secondary
+                                    {% elif order.status == 'in_delivery' %}bg-info
+                                    {% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'flowerly:order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye"></i> Детали
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-4">Активных заказов нет</p>
+            {% endif %}
+            
+            <!-- Завершённые заказы -->
+            <h5 class="mb-3 text-success"><i class="bi bi-check-circle"></i> Завершённые</h5>
+            
+            {% if completed_orders %}
             <div class="table-responsive shadow-sm">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -44,7 +93,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for order in orders %}
+                        {% for order in completed_orders %}
                         <tr>
                             <td><strong>№{{ order.id }}</strong></td>
                             <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
@@ -52,12 +101,7 @@
                             <td class="fw-bold">{{ order.total_price }} ₽</td>
                             <td>
                                 <span class="badge 
-                                    {% if order.status == 'new' %}bg-primary
-                                    {% elif order.status == 'confirmed' %}bg-info text-dark
-                                    {% elif order.status == 'assembling' %}bg-warning text-dark
-                                    {% elif order.status == 'ready' %}bg-secondary
-                                    {% elif order.status == 'in_delivery' %}bg-info
-                                    {% elif order.status == 'delivered' %}bg-success
+                                    {% if order.status == 'delivered' %}bg-success
                                     {% elif order.status == 'cancelled' %}bg-danger
                                     {% endif %}">
                                     {{ order.get_status_display }}
@@ -74,6 +118,10 @@
                 </table>
             </div>
             {% else %}
+            <p class="text-muted">Завершённых заказов пока нет</p>
+            {% endif %}
+            
+            {% if not active_orders and not completed_orders %}
             <div class="text-center py-5">
                 <i class="bi bi-inbox display-1 text-muted"></i>
                 <h4 class="text-muted mt-3">Заказов пока нет</h4>

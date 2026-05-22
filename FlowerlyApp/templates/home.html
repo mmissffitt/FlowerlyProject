@@ -4,7 +4,6 @@
 {% block title %}Flowerly — доставка цветов{% endblock %}
 
 {% block content %}
-<!-- Hero-секция -->
 <section class="hero-section text-center py-5" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
     <div class="container">
         <h1 class="display-4 fw-bold mb-3">Цветы с душой и доставкой</h1>
@@ -20,7 +19,6 @@
     </div>
 </section>
 
-<!-- Хиты продаж -->
 {% if hit_bouquets %}
 <section class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -33,14 +31,16 @@
             <div class="card h-100 shadow-sm border-0">
                 <div class="position-relative">
                     {% if bouquet.image %}
-                    <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" 
-                         style="height: 200px; object-fit: cover;">
+                    <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" style="height: 200px; object-fit: cover;">
                     {% else %}
                     <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                         <i class="bi bi-flower1 text-muted display-4"></i>
                     </div>
                     {% endif %}
                     <span class="position-absolute top-0 start-0 badge bg-danger m-2">ХИТ</span>
+                    <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm fav-btn" data-bouquet-id="{{ bouquet.id }}">
+                        <i class="bi bi-heart"></i>
+                    </button>
                 </div>
                 <div class="card-body d-flex flex-column">
                     <h6 class="card-title">{{ bouquet.name }}</h6>
@@ -48,12 +48,10 @@
                     <div class="mt-auto">
                         <p class="fw-bold text-danger mb-2">{{ bouquet.price }} ₽</p>
                         <div class="d-flex gap-2">
-                            <a href="{% url 'flowerly:bouquet_detail' bouquet.slug %}" class="btn btn-outline-danger btn-sm flex-grow-1">
-                                Подробнее
-                            </a>
-                            <a href="{% url 'flowerly:cart_add_bouquet' bouquet.id %}?next=home" class="btn btn-danger btn-sm">
+                            <a href="{% url 'flowerly:bouquet_detail' bouquet.slug %}" class="btn btn-outline-danger btn-sm flex-grow-1">Подробнее</a>
+                            <button class="btn btn-danger btn-sm cart-add-btn" data-bouquet-id="{{ bouquet.id }}">
                                 <i class="bi bi-cart-plus"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -64,7 +62,6 @@
 </section>
 {% endif %}
 
-<!-- Новинки -->
 {% if new_bouquets %}
 <section class="bg-light py-5">
     <div class="container">
@@ -76,26 +73,28 @@
             {% for bouquet in new_bouquets %}
             <div class="col-6 col-md-3">
                 <div class="card h-100 shadow-sm border-0">
-                    {% if bouquet.image %}
-                    <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" 
-                         style="height: 200px; object-fit: cover;">
-                    {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                        <i class="bi bi-flower1 text-muted display-4"></i>
+                    <div class="position-relative">
+                        {% if bouquet.image %}
+                        <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-flower1 text-muted display-4"></i>
+                        </div>
+                        {% endif %}
+                        <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm fav-btn" data-bouquet-id="{{ bouquet.id }}">
+                            <i class="bi bi-heart"></i>
+                        </button>
                     </div>
-                    {% endif %}
                     <div class="card-body d-flex flex-column">
                         <h6 class="card-title">{{ bouquet.name }}</h6>
                         <p class="text-muted small mb-2">{{ bouquet.occasion.name|default:"" }}</p>
                         <div class="mt-auto">
                             <p class="fw-bold text-danger mb-2">{{ bouquet.price }} ₽</p>
                             <div class="d-flex gap-2">
-                                <a href="{% url 'flowerly:bouquet_detail' bouquet.slug %}" class="btn btn-outline-danger btn-sm flex-grow-1">
-                                    Подробнее
-                                </a>
-                                <a href="{% url 'flowerly:cart_add_bouquet' bouquet.id %}?next=home" class="btn btn-danger btn-sm">
+                                <a href="{% url 'flowerly:bouquet_detail' bouquet.slug %}" class="btn btn-outline-danger btn-sm flex-grow-1">Подробнее</a>
+                                <button class="btn btn-danger btn-sm cart-add-btn" data-bouquet-id="{{ bouquet.id }}">
                                     <i class="bi bi-cart-plus"></i>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -107,38 +106,49 @@
 </section>
 {% endif %}
 
-<!-- Преимущества -->
 <section class="container my-5">
     <h2 class="text-center fw-bold mb-5">Почему выбирают Flowerly</h2>
     <div class="row g-4 text-center">
-        <div class="col-md-3">
-            <div class="p-4">
-                <i class="bi bi-flower1 text-danger display-4"></i>
-                <h5 class="mt-3">Свежие цветы</h5>
-                <p class="text-muted">Только свежие цветы от проверенных поставщиков</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="p-4">
-                <i class="bi bi-truck text-danger display-4"></i>
-                <h5 class="mt-3">Быстрая доставка</h5>
-                <p class="text-muted">Доставляем точно ко времени в любую точку города</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="p-4">
-                <i class="bi bi-puzzle text-danger display-4"></i>
-                <h5 class="mt-3">Конструктор</h5>
-                <p class="text-muted">Соберите уникальный букет под любой случай</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="p-4">
-                <i class="bi bi-heart text-danger display-4"></i>
-                <h5 class="mt-3">С любовью</h5>
-                <p class="text-muted">Каждый букет собран с вниманием к деталям</p>
-            </div>
-        </div>
+        <div class="col-md-3"><div class="p-4"><i class="bi bi-flower1 text-danger display-4"></i><h5 class="mt-3">Свежие цветы</h5><p class="text-muted">Только свежие цветы от проверенных поставщиков</p></div></div>
+        <div class="col-md-3"><div class="p-4"><i class="bi bi-truck text-danger display-4"></i><h5 class="mt-3">Быстрая доставка</h5><p class="text-muted">Доставляем точно ко времени</p></div></div>
+        <div class="col-md-3"><div class="p-4"><i class="bi bi-puzzle text-danger display-4"></i><h5 class="mt-3">Конструктор</h5><p class="text-muted">Соберите уникальный букет</p></div></div>
+        <div class="col-md-3"><div class="p-4"><i class="bi bi-heart text-danger display-4"></i><h5 class="mt-3">С любовью</h5><p class="text-muted">Каждый букет собран с вниманием</p></div></div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.fav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const bouquetId = this.dataset.bouquetId;
+            const icon = this.querySelector('i');
+            fetch(`/favorite/toggle/${bouquetId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            })
+            .then(r => r.json())
+            .then(data => {
+                icon.className = data.is_favorite ? 'bi bi-heart-fill text-danger' : 'bi bi-heart';
+            });
+        });
+    });
+    
+    document.querySelectorAll('.cart-add-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const bouquetId = this.dataset.bouquetId;
+            const icon = this.querySelector('i');
+            const orig = icon.className;
+            icon.className = 'bi bi-check-lg';
+            this.disabled = true;
+            fetch(`/cart/add/${bouquetId}/`, { method: 'GET' })
+            .then(() => {
+                updateCartCount();
+                setTimeout(() => { icon.className = orig; this.disabled = false; }, 1500);
+            });
+        });
+    });
+});
+</script>
 {% endblock %}
