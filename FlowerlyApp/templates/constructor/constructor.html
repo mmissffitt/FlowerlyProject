@@ -32,17 +32,20 @@
                             <div class="card h-100 shadow-sm border-0">
                                 {% if flower.image %}
                                 <img src="{{ flower.image.url }}" class="card-img-top" alt="{{ flower.name }}" 
-                                     style="height: 180px; object-fit: cover;">
+                                     style="height: 220px; object-fit: contain; object-position: top;">
                                 {% else %}
-                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
                                     <i class="bi bi-flower1 text-muted display-4"></i>
                                 </div>
                                 {% endif %}
                                 <div class="card-body text-center">
                                     <h6 class="card-title">{{ flower.name }}</h6>
                                     <p class="text-danger fw-bold mb-2">{{ flower.price }} ₽/шт</p>
-                                    <button class="btn btn-outline-danger btn-sm w-100" 
-                                            onclick="openFlowerModal('{{ flower.id }}', '{{ flower.name|escapejs }}', {{ flower.price }}, '{% if flower.image %}{{ flower.image.url }}{% else %}{% static 'images/no-photo.png' %}{% endif %}')">
+                                    <button class="btn btn-outline-danger btn-sm w-100 add-flower-btn" 
+                                            data-flower-id="{{ flower.id }}"
+                                            data-flower-name="{{ flower.name|escapejs }}"
+                                            data-flower-price="{{ flower.price }}"
+                                            data-flower-image="{% if flower.image %}{{ flower.image.url }}{% else %}{% static 'images/no-photo.png' %}{% endif %}">
                                         <i class="bi bi-plus-circle"></i> Добавить
                                     </button>
                                 </div>
@@ -60,17 +63,20 @@
                             <div class="card h-100 shadow-sm border-0">
                                 {% if decor.image %}
                                 <img src="{{ decor.image.url }}" class="card-img-top" alt="{{ decor.name }}" 
-                                     style="height: 180px; object-fit: cover;">
+                                     style="height: 220px; object-fit: contain; object-position: top;">
                                 {% else %}
-                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
                                     <i class="bi bi-gift text-muted display-4"></i>
                                 </div>
                                 {% endif %}
                                 <div class="card-body text-center">
                                     <h6 class="card-title">{{ decor.name }}</h6>
                                     <p class="text-danger fw-bold mb-2">{{ decor.price }} ₽/шт</p>
-                                    <button class="btn btn-outline-danger btn-sm w-100" 
-                                            onclick="openDecorModal('{{ decor.id }}', '{{ decor.name|escapejs }}', {{ decor.price }}, '{% if decor.image %}{{ decor.image.url }}{% else %}{% static 'images/no-photo.png' %}{% endif %}')">
+                                    <button class="btn btn-outline-danger btn-sm w-100 add-decor-btn" 
+                                            data-decor-id="{{ decor.id }}"
+                                            data-decor-name="{{ decor.name|escapejs }}"
+                                            data-decor-price="{{ decor.price }}"
+                                            data-decor-image="{% if decor.image %}{{ decor.image.url }}{% else %}{% static 'images/no-photo.png' %}{% endif %}">
                                         <i class="bi bi-plus-circle"></i> Добавить
                                     </button>
                                 </div>
@@ -90,7 +96,6 @@
                 </div>
                 <div class="card-body" id="bouquet-preview">
                     {% if session_bouquet.flowers or session_bouquet.decors %}
-                        <!-- Цветы -->
                         {% if session_bouquet.flowers %}
                         <h6 class="fw-bold">Цветы:</h6>
                         <ul class="list-group list-group-flush mb-3" id="flower-list">
@@ -111,7 +116,6 @@
                         </ul>
                         {% endif %}
                         
-                        <!-- Декор -->
                         {% if session_bouquet.decors %}
                         <h6 class="fw-bold">Декор:</h6>
                         <ul class="list-group list-group-flush mb-3" id="decor-list">
@@ -140,13 +144,11 @@
                     
                     <hr>
                     
-                    <!-- Итого -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold fs-5">Итого:</span>
                         <span class="fw-bold fs-4 text-danger" id="total-price">{{ total }} ₽</span>
                     </div>
                     
-                    <!-- Кнопка добавления в корзину -->
                     <form method="post" action="{% url 'flowerly:constructor_add_to_cart' %}">
                         {% csrf_token %}
                         <textarea name="notes" class="form-control mb-3" rows="2" 
@@ -162,7 +164,7 @@
     </div>
 </div>
 
-<!-- Модальное окно выбора количества ЦВЕТКА -->
+<!-- Модальное окно ЦВЕТКА -->
 <div class="modal fade" id="flowerModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
@@ -171,7 +173,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center">
-                <img id="flowerModalImage" src="" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover;">
+                <img id="flowerModalImage" src="" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover;" onerror="this.src='/static/images/no-photo.png'">
                 <p class="fw-bold" id="flowerModalName"></p>
                 <p class="text-danger" id="flowerModalPrice"></p>
                 <div class="d-flex justify-content-center align-items-center gap-3 mb-3">
@@ -181,15 +183,13 @@
                 </div>
                 <input type="hidden" id="currentFlowerId">
                 <input type="hidden" id="currentQuantity" value="1">
-                <button class="btn btn-danger w-100" onclick="addFlowerToBouquet()">
-                    Добавить
-                </button>
+                <button class="btn btn-danger w-100" onclick="addFlowerToBouquet()">Добавить</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Модальное окно выбора количества ДЕКОРА -->
+<!-- Модальное окно ДЕКОРА -->
 <div class="modal fade" id="decorModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
@@ -198,7 +198,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center">
-                <img id="decorModalImage" src="" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover;">
+                <img id="decorModalImage" src="" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover;" onerror="this.src='/static/images/no-photo.png'">
                 <p class="fw-bold" id="decorModalName"></p>
                 <p class="text-danger" id="decorModalPrice"></p>
                 <div class="d-flex justify-content-center align-items-center gap-3 mb-3">
@@ -208,9 +208,7 @@
                 </div>
                 <input type="hidden" id="currentDecorId">
                 <input type="hidden" id="currentDecorQuantity" value="1">
-                <button class="btn btn-danger w-100" onclick="addDecorToBouquet()">
-                    Добавить
-                </button>
+                <button class="btn btn-danger w-100" onclick="addDecorToBouquet()">Добавить</button>
             </div>
         </div>
     </div>

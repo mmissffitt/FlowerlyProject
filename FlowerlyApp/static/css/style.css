@@ -494,3 +494,7 @@ footer a:hover {
     font-size: 3rem;
 }
 
+.navbar .badge {
+    z-index: 10;
+    position: relative;
+}

@@ -13,17 +13,25 @@
             <div class="card mb-3 shadow-sm {% if item in unavailable_items %}border-warning{% endif %}">
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <div class="col-md-2">
-                            {% if item.ready_bouquet and item.ready_bouquet.image %}
-                            <img src="{{ item.ready_bouquet.image.url }}" class="img-fluid rounded" 
-                                 style="height: 80px; object-fit: cover;">
-                            {% else %}
-                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
-                                 style="height: 80px;">
-                                <i class="bi bi-flower1 text-muted display-6"></i>
-                            </div>
-                            {% endif %}
+                <div class="col-md-2">
+                    {% if item.ready_bouquet and item.ready_bouquet.image %}
+                        <img src="{{ item.ready_bouquet.image.url }}" class="img-fluid rounded" 
+                                style="height: 80px; object-fit: cover;">
+                    {% elif item.custom_bouquet %}
+                <div class="rounded d-flex align-items-center justify-content-center" 
+                                 style="height: 80px; background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
+                <div class="text-center">
+                        <i class="bi bi-puzzle text-danger fs-3"></i>
+                     <br><small class="text-danger fw-bold">Ваш букет</small>
                         </div>
+                        </div>
+                        {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                             style="height: 80px;">
+                                 <i class="bi bi-flower1 text-muted display-6"></i>
+                        </div>
+                         {% endif %}
+                            </div>
                         <div class="col-md-4">
                             <h6 class="mb-1">{{ item.get_name }}</h6>
                             {% if item.custom_bouquet %}

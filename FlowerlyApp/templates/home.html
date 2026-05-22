@@ -4,7 +4,7 @@
 {% block title %}Flowerly — доставка цветов{% endblock %}
 
 {% block content %}
-<section class="hero-section text-center py-5" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
+<section class="hero-section text-center py-5" style="background: linear-gradient(135deg, rgba(252, 228, 236, 0.85), rgba(248, 187, 208, 0.4)), url('{% static "images/hero-bg.jpg" %}') center/cover no-repeat;">
     <div class="container">
         <h1 class="display-4 fw-bold mb-3">Цветы с душой и доставкой</h1>
         <p class="lead mb-4">Соберите уникальный букет в конструкторе или выберите готовую композицию</p>
@@ -31,9 +31,9 @@
             <div class="card h-100 shadow-sm border-0">
                 <div class="position-relative">
                     {% if bouquet.image %}
-                    <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" style="height: 200px; object-fit: cover;">
+                    <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" style="height: 280px; object-fit: cover;">
                     {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 280px;">
                         <i class="bi bi-flower1 text-muted display-4"></i>
                     </div>
                     {% endif %}
@@ -75,9 +75,9 @@
                 <div class="card h-100 shadow-sm border-0">
                     <div class="position-relative">
                         {% if bouquet.image %}
-                        <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" style="height: 200px; object-fit: cover;">
+                        <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" style="height: 280px; object-fit: cover;">
                         {% else %}
-                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 280px;">
                             <i class="bi bi-flower1 text-muted display-4"></i>
                         </div>
                         {% endif %}

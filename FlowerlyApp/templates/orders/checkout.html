@@ -8,7 +8,7 @@
     
     <div class="row">
         <div class="col-md-8">
-            <form method="post">
+            <form method="post" id="checkout-form">
                 {% csrf_token %}
                 
                 <!-- Адрес доставки -->
@@ -27,30 +27,30 @@
                 </div>
                 
                 <!-- Дата и время -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Дата и время доставки</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Дата доставки</label>
-                {{ form.delivery_date }}
-                {% if form.delivery_date.errors %}
-                <div class="text-danger small">{{ form.delivery_date.errors }}</div>
-                {% endif %}
-                <div class="form-text">Доставка возможна начиная с завтрашнего дня</div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Время доставки</label>
-                {{ form.delivery_time_slot }}
-                {% if form.delivery_time_slot.errors %}
-                <div class="text-danger small">{{ form.delivery_time_slot.errors }}</div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Дата и время доставки</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Дата доставки</label>
+                                {{ form.delivery_date }}
+                                {% if form.delivery_date.errors %}
+                                <div class="text-danger small">{{ form.delivery_date.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Доставка возможна начиная с завтрашнего дня</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Время доставки</label>
+                                {{ form.delivery_time_slot }}
+                                {% if form.delivery_time_slot.errors %}
+                                <div class="text-danger small">{{ form.delivery_time_slot.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Комментарий -->
                 <div class="card shadow-sm mb-4">
@@ -90,27 +90,24 @@
                     <hr>
                     
                     <!-- Промокод -->
-                    <form method="post" action="{% url 'flowerly:apply_promo' %}" class="mb-3">
-                        {% csrf_token %}
+                    <div class="mb-3">
                         <label class="form-label small">Промокод</label>
-                        <div class="input-group">
+                        <div class="input-group" id="promo-group">
                             {{ promo_form.code }}
-                            <button type="submit" class="btn btn-outline-danger">Применить</button>
+                            <button type="button" class="btn btn-outline-danger" id="promo-btn">Применить</button>
                         </div>
-                    </form>
-                    
-                    {% if request.session.promo_discount %}
-                    <div class="d-flex justify-content-between text-success mb-2">
-                        <small>Скидка по промокоду</small>
-                        <small>−{{ request.session.promo_discount }} ₽</small>
                     </div>
-                    {% endif %}
+                    
+                    <div id="promo-discount-row" class="d-flex justify-content-between text-success mb-2" {% if not request.session.promo_discount %}style="display:none;"{% endif %}>
+                        <small>Скидка по промокоду</small>
+                        <small id="promo-discount-amount">−{{ request.session.promo_discount|default:"0" }} ₽</small>
+                    </div>
                     
                     <hr>
                     
                     <div class="d-flex justify-content-between fw-bold fs-5">
                         <span>Итого</span>
-                        <span class="text-danger">
+                        <span class="text-danger" id="total-price">
                             {% if request.session.promo_discount %}
                                 {{ total|add:request.session.promo_discount|floatformat:2 }} ₽
                             {% else %}
@@ -123,4 +120,55 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('promo-btn').addEventListener('click', function() {
+    const input = document.querySelector('#promo-group input[name="code"]');
+    const btn = this;
+    const code = input.value.trim();
+    
+    if (!code) return;
+    
+    const origHTML = btn.innerHTML;
+    btn.textContent = '...';
+    btn.disabled = true;
+    
+    fetch('{% url 'flowerly:apply_promo' %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'code=' + encodeURIComponent(code),
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.textContent = origHTML;
+        btn.disabled = false;
+        
+        if (data.success) {
+            // Обновляем итог
+            document.getElementById('total-price').textContent = data.total.toLocaleString('ru-RU') + ' ₽';
+            
+            // Показываем скидку
+            document.getElementById('promo-discount-row').style.display = 'flex';
+            document.getElementById('promo-discount-amount').textContent = '−' + data.discount.toLocaleString('ru-RU') + ' ₽';
+            
+            // Меняем кнопку на галочку
+            btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+            btn.className = 'btn btn-success';
+            btn.disabled = true;
+            input.disabled = true;
+        } else {
+            alert(data.error);
+        }
+    })
+    .catch(() => {
+        btn.textContent = origHTML;
+        btn.disabled = false;
+    });
+});
+</script>
 {% endblock %}

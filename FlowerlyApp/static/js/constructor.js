@@ -156,7 +156,6 @@ function updateBouquetPreview(data) {
 
     let html = '';
 
-    // Цветы
     if (data.flowers && Object.keys(data.flowers).length > 0) {
         html += '<h6 class="fw-bold">Цветы:</h6><ul class="list-group list-group-flush mb-3" id="flower-list">';
         for (const [fid, item] of Object.entries(data.flowers)) {
@@ -177,7 +176,6 @@ function updateBouquetPreview(data) {
         html += '</ul>';
     }
 
-    // Декор
     if (data.decors && Object.keys(data.decors).length > 0) {
         html += '<h6 class="fw-bold">Декор:</h6><ul class="list-group list-group-flush mb-3" id="decor-list">';
         for (const [did, item] of Object.entries(data.decors)) {
@@ -211,7 +209,65 @@ function updateBouquetPreview(data) {
         <span class="fw-bold fs-5">Итого:</span>
         <span class="fw-bold fs-4 text-danger">${formatPrice(data.total)} ₽</span>
     </div>`;
-    html += preview.querySelector('form') ? preview.querySelector('form').outerHTML : '';
+
+    // Кнопка всегда активна после добавления товаров
+    const hasItems = (data.flowers && Object.keys(data.flowers).length > 0) || 
+                     (data.decors && Object.keys(data.decors).length > 0);
+    html += `<form method="post" action="/constructor/add-to-cart/">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${getCSRF()}">
+        <textarea name="notes" class="form-control mb-3" rows="2" placeholder="Пожелания флористу (необязательно)"></textarea>
+        <button type="submit" class="btn btn-danger w-100 btn-lg" ${hasItems ? '' : 'disabled'}>
+            <i class="bi bi-cart-plus"></i> Добавить в корзину
+        </button>
+    </form>`;
 
     preview.innerHTML = html;
 }
+
+// --- Обработчики для data-кнопок ---
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.add-flower-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openFlowerModal(
+                this.dataset.flowerId,
+                this.dataset.flowerName,
+                parseFloat(this.dataset.flowerPrice),
+                this.dataset.flowerImage
+            );
+        });
+    });
+
+    document.querySelectorAll('.add-decor-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openDecorModal(
+                this.dataset.decorId,
+                this.dataset.decorName,
+                parseFloat(this.dataset.decorPrice),
+                this.dataset.decorImage
+            );
+        });
+    });
+});
+
+// --- Клавиатурные сокращения ---
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        ['flowerModal', 'decorModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const modal = bootstrap.Modal.getInstance(el);
+                if (modal) modal.hide();
+            }
+        });
+    }
+    if (e.key === 'Enter') {
+        if (document.getElementById('flowerModal')?.classList.contains('show')) {
+            e.preventDefault();
+            addFlowerToBouquet();
+        }
+        if (document.getElementById('decorModal')?.classList.contains('show')) {
+            e.preventDefault();
+            addDecorToBouquet();
+        }
+    }
+});

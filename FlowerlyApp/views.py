@@ -530,7 +530,7 @@ def checkout(request):
                     return redirect('flowerly:cart_detail')
 
             # Рассчитываем скидку из сессии
-            discount_amount = request.session.get('promo_discount', 0)
+            discount_amount = Decimal(str(request.session.get('promo_discount', 0)))
             promo_code = request.session.get('promo_code')
             promo = None
             if promo_code:
@@ -602,29 +602,40 @@ def checkout(request):
 @login_required
 @require_POST
 def apply_promo(request):
-    """Применение промокода"""
-    form = PromoCodeForm(request.POST)
-    if form.is_valid():
-        code = form.cleaned_data['code'].upper()
-        try:
-            promo = PromoCode.objects.get(code=code)
+    """Применение промокода (AJAX)"""
+    code = request.POST.get('code', '').upper()
+    
+    if not code:
+        return JsonResponse({'success': False, 'error': 'Введите промокод'})
+    
+    try:
+        promo = PromoCode.objects.get(code=code)
+        cart = Cart.objects.get(user=request.user)
+        cart_total = cart.total_price()
 
-            cart = Cart.objects.get(user=request.user)
-            cart_total = cart.total_price()
+        # Уже применён?
+        current_code = request.session.get('promo_code')
+        if current_code == code:
+            return JsonResponse({'success': False, 'error': 'Этот промокод уже применён'})
 
-            if promo.is_valid(cart_total):
-                discount = promo.calculate_discount(cart_total)
-                request.session['promo_code'] = code
-                request.session['promo_discount'] = float(discount)
-                request.session.modified = True
-                messages.success(request, f'Промокод применён! Скидка: {discount:.2f} ₽')
-            else:
-                messages.error(request, 'Промокод недействителен или истёк')
-        except PromoCode.DoesNotExist:
-            messages.error(request, 'Промокод не найден')
-
-    return redirect('flowerly:checkout')
-
+        if promo.is_valid(cart_total):
+            discount = float(promo.calculate_discount(cart_total))
+            request.session['promo_code'] = code
+            request.session['promo_discount'] = discount
+            request.session.modified = True
+            
+            new_total = float(cart_total) - discount
+            
+            return JsonResponse({
+                'success': True,
+                'discount': discount,
+                'total': round(new_total, 2),
+                'message': f'Промокод применён! Скидка: {discount:.2f} ₽',
+            })
+        else:
+            return JsonResponse({'success': False, 'error': 'Промокод недействителен или истёк'})
+    except PromoCode.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Промокод не найден'})
 
 @login_required
 def order_success(request, order_id):
